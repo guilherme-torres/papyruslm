@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-import uuid
+from uuid import UUID, uuid4
 
 from papyruslm.domain.entities.tag import Tag
 
@@ -8,4 +8,4 @@ from papyruslm.domain.entities.tag import Tag
 class Notebook:
     name: str
     tags: list[Tag] = field(default_factory=list)
-    id: uuid.UUID = field(default_factory=uuid.uuid4)
+    id: UUID = field(default_factory=uuid4)

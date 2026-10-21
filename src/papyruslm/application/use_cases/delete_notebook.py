@@ -1,6 +1,6 @@
 import uuid
 
-from papyruslm.application.ports.notebook_repository import NotebookRepository
+from papyruslm.application.ports.repositories.notebook_repository import NotebookRepository
 
 
 class DeleteNotebookUseCase:

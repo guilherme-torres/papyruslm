@@ -1,7 +1,7 @@
 from typing import Protocol
-import uuid
+from uuid import UUID
 
-from papyruslm.domain.entities import Notebook, Tag
+from papyruslm.domain.entities import Notebook
 
 
 class NotebookRepository(Protocol):
@@ -13,4 +13,4 @@ class NotebookRepository(Protocol):
         tags: list[str] | None = None,
     ) -> list[Notebook]: ...
     async def update_notebook(self, notebook: Notebook) -> None: ...
-    async def delete_notebook(self, id: uuid.UUID) -> None: ...
+    async def delete_notebook(self, id: UUID) -> None: ...
