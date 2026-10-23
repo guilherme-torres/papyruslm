@@ -6,15 +6,15 @@ from fastapi import APIRouter, Query, status
 
 from papyruslm.adapters.inbound.http.routers.v1.schemas import (
     NotebookFilterParams,
-    NotebookIn,
-    NotebookOut,
-    NotebookPage,
+    NotebookRequest,
+    NotebookResponse,
+    NotebookResponsePaginated,
 )
+from papyruslm.application.dto import CreateNotebookInput, UpdateNotebookInput
 from papyruslm.application.use_cases.create_notebook import CreateNotebookUseCase
 from papyruslm.application.use_cases.delete_notebook import DeleteNotebookUseCase
 from papyruslm.application.use_cases.list_notebooks import ListNotebooksUseCase
 from papyruslm.application.use_cases.update_notebook import UpdateNotebookUseCase
-from papyruslm.domain.entities import Notebook, Tag
 
 
 router = APIRouter(prefix="/notebooks", tags=["notebooks"], route_class=DishkaRoute)
@@ -22,36 +22,35 @@ router = APIRouter(prefix="/notebooks", tags=["notebooks"], route_class=DishkaRo
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_notebook(
-    body: NotebookIn,
+    body: NotebookRequest,
     use_case: FromDishka[CreateNotebookUseCase],
-) -> NotebookOut:
-    notebook = Notebook(name=body.name, tags=[Tag(name=name) for name in body.tags])
-    await use_case.execute(notebook)
-    return NotebookOut.model_validate(notebook)
+) -> NotebookResponse:
+    notebook = await use_case.execute(CreateNotebookInput(name=body.name, tags=body.tags))
+    return NotebookResponse.model_validate(notebook)
 
 
 @router.get("")
 async def list_notebooks(
     params: Annotated[NotebookFilterParams, Query()],
     use_case: FromDishka[ListNotebooksUseCase],
-) -> NotebookPage:
-    notebooks = await use_case.execute(params.limit, params.offset, params.tags)
-    return NotebookPage(
-        items=[NotebookOut.model_validate(notebook) for notebook in notebooks],
-        limit=params.limit,
-        offset=params.offset,
+) -> NotebookResponsePaginated:
+    response = await use_case.execute(params.limit, params.offset, params.tags)
+    return NotebookResponsePaginated(
+        total=response.total,
+        limit=response.limit,
+        offset=response.offset,
+        items=[NotebookResponse.model_validate(notebook) for notebook in response.items]
     )
 
 
 @router.put("/{id}")
 async def update_notebook(
     id: UUID,
-    body: NotebookIn,
+    body: NotebookRequest,
     use_case: FromDishka[UpdateNotebookUseCase],
-) -> NotebookOut:
-    notebook = Notebook(id=id, name=body.name, tags=[Tag(name=name) for name in body.tags])
-    await use_case.execute(notebook)
-    return NotebookOut.model_validate(notebook)
+) -> NotebookResponse:
+    notebook = await use_case.execute(UpdateNotebookInput(id=id, name=body.name, tags=body.tags))
+    return NotebookResponse.model_validate(notebook)
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)

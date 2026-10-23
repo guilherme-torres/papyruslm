@@ -4,24 +4,24 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class NotebookIn(BaseModel):
+class NotebookRequest(BaseModel):
     name: str = Field(min_length=1, max_length=60)
     tags: list[Annotated[str, Field(min_length=1, max_length=30)]] = []
 
 
-class TagOut(BaseModel):
+class TagResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
     name: str
 
 
-class NotebookOut(BaseModel):
+class NotebookResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
     name: str
-    tags: list[TagOut]
+    tags: list[TagResponse]
 
 
 class NotebookFilterParams(BaseModel):
@@ -30,7 +30,8 @@ class NotebookFilterParams(BaseModel):
     tags: list[str] = []
 
 
-class NotebookPage(BaseModel):
-    items: list[NotebookOut]
+class NotebookResponsePaginated(BaseModel):    
+    total: int
     limit: int
     offset: int
+    items: list[NotebookResponse]

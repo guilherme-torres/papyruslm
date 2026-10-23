@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,20 +15,20 @@ class SQLAlchemyNotebookRepository:
     def __init__(self, session: AsyncSession):
         self._session = session
 
-    async def create_notebook(self, notebook: Notebook) -> None:
-        tag_models = await self._get_or_create_tags(notebook.tags)
-        self._session.add(
-            SQLAlchemyNotebook(id=notebook.id, name=notebook.name, tags=tag_models)
-        )
+    async def create_notebook(self, notebook: Notebook) -> Notebook:
+        tags_db = await self._get_or_create_tags(notebook.tags)
+        notebook_db = SQLAlchemyNotebook(id=notebook.id, name=notebook.name, tags=tags_db)
+        self._session.add(notebook_db)
         await self._session.commit()
-        notebook.tags = [tag.to_domain() for tag in tag_models]
+        await self._session.refresh(notebook_db)
+        return notebook_db.to_entity()
 
     async def list_notebooks(
         self,
         limit: int,
         offset: int,
         tags: list[str] | None = None,
-    ) -> list[Notebook]:
+    ) -> tuple[list[Notebook], int]:
         stmt = (
             select(SQLAlchemyNotebook)
             .options(selectinload(SQLAlchemyNotebook.tags))
@@ -36,20 +36,24 @@ class SQLAlchemyNotebookRepository:
             .limit(limit)
             .offset(offset)
         )
+        count_stmt = select(func.count).select_from(SQLAlchemyNotebook)
         if tags:
             stmt = stmt.where(SQLAlchemyNotebook.tags.any(SQLAlchemyTag.name.in_(tags)))
+            count_stmt = count_stmt.where(SQLAlchemyNotebook.tags.any(SQLAlchemyTag.name.in_(tags)))
         result = await self._session.scalars(stmt)
-        return [model.to_domain() for model in result]
+        total = await self._session.scalar(count_stmt)
+        return [notebook_db.to_entity() for notebook_db in result], total
 
-    async def update_notebook(self, notebook: Notebook) -> None:
+    async def update_notebook(self, notebook: Notebook) -> Notebook:
         try:
-            model = await self._get_model(notebook.id)
+            notebook_db = await self._get_model(notebook.id)
         except NoResultFound as e:
             raise NotebookNotFound(notebook.id) from e
-        model.name = notebook.name
-        model.tags = await self._get_or_create_tags(notebook.tags)
+        notebook_db.name = notebook.name
+        notebook_db.tags = await self._get_or_create_tags(notebook.tags)
         await self._session.commit()
-        notebook.tags = [tag.to_domain() for tag in model.tags]
+        await self._session.refresh(notebook_db)
+        return notebook_db.to_entity()
 
     async def delete_notebook(self, id: UUID) -> None:
         try:
