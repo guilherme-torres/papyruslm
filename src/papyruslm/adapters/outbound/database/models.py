@@ -1,21 +1,22 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import Column, DateTime, ForeignKey, String, Table, Text, func, text
+from sqlalchemy import Column, ForeignKey, String, Table, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from papyruslm.domain.entities import Notebook, Tag
+from papyruslm.adapters.outbound.database.types import UTCDateTime
+from papyruslm.domain.entities import Notebook, Tag, Flashcard
 
 
 class Base(DeclarativeBase):
-    pass
+    type_annotation_map = {datetime: UTCDateTime}
 
 
 tags_notebooks = Table(
     "tags_notebooks",
     Base.metadata,
-    Column("tag_id", ForeignKey("tags.id"), primary_key=True),
-    Column("notebook_id", ForeignKey("notebooks.id"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
+    Column("notebook_id", ForeignKey("notebooks.id", ondelete="CASCADE"), primary_key=True),
 )
 
 
@@ -23,10 +24,11 @@ class SQLAlchemyNotebook(Base):
     __tablename__ = "notebooks"
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(60))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    name: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 
-    tags: Mapped[list["SQLAlchemyTag"]] = relationship(secondary=tags_notebooks)
+    tags: Mapped[list["SQLAlchemyTag"]] = relationship(secondary=tags_notebooks, lazy="selectin")
 
     def to_entity(self) -> Notebook:
         return Notebook(id=self.id, name=self.name, tags=[tag.to_entity() for tag in self.tags])
@@ -36,13 +38,14 @@ class SQLAlchemyTag(Base):
     __tablename__ = "tags"
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(30), unique=True)
+    name: Mapped[str] = mapped_column(String(100), unique=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     def to_entity(self) -> Tag:
         return Tag(id=self.id, name=self.name)
 
 
-class Flashcard(Base):
+class SQLAlchemyFlashcard(Base):
     __tablename__ = "flashcards"
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
@@ -52,6 +55,31 @@ class Flashcard(Base):
     repetitions: Mapped[int]
     interval_days: Mapped[int]
     ease_factor: Mapped[float]
-    due_date: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    due_date: Mapped[datetime]
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+
+    @classmethod
+    def from_entity(cls, flashcard: Flashcard) -> "SQLAlchemyFlashcard":
+        return cls(
+            id=flashcard.id,
+            front=flashcard.front,
+            back=flashcard.back,
+            notebook_id=flashcard.notebook_id,
+            repetitions=flashcard.repetitions,
+            interval_days=flashcard.interval_days,
+            ease_factor=flashcard.ease_factor,
+            due_date=flashcard.due_date,
+        )
+
+    def to_entity(self) -> Flashcard:
+        return Flashcard(
+            id=self.id,
+            front=self.front,
+            back=self.back,
+            notebook_id=self.notebook_id,
+            repetitions=self.repetitions,
+            interval_days=self.interval_days,
+            ease_factor=self.ease_factor,
+            due_date=self.due_date,
+        )

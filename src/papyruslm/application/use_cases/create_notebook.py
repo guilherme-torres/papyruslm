@@ -1,5 +1,5 @@
 from papyruslm.application.dto import CreateNotebookInput
-from papyruslm.application.ports.repositories.notebook_repository import NotebookRepository
+from papyruslm.domain.repositories import NotebookRepository
 from papyruslm.domain.entities import Notebook, Tag
 
 

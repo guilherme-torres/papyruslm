@@ -1,9 +1,8 @@
 from datetime import datetime, timezone
-from uuid import UUID
 
 from papyruslm.application.dto import FlashcardOutput, ReviewFlashcardInput
 from papyruslm.application.exceptions import FlashcardNotFound
-from papyruslm.application.ports.repositories.flashcard_repository import FlashcardRepository
+from papyruslm.domain.repositories import FlashcardRepository
 from papyruslm.domain.value_objects import ReviewQuality
 
 
@@ -19,4 +18,6 @@ class ReviewFlashcardUseCase:
             raise FlashcardNotFound(review.flashcard_id)
         flashcard.review(review_quality, now)
         flashcard = await self._flashcard_repository.update_flashcard(flashcard)
+        if flashcard is None:
+            raise FlashcardNotFound(review.flashcard_id)
         return FlashcardOutput.from_entity(flashcard)

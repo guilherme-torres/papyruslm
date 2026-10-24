@@ -1,12 +1,12 @@
-from typing import Annotated
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class NotebookRequest(BaseModel):
-    name: str = Field(min_length=1, max_length=60)
-    tags: list[Annotated[str, Field(min_length=1, max_length=30)]] = []
+    name: str
+    tags: list[str] = []
 
 
 class TagResponse(BaseModel):
@@ -30,8 +30,28 @@ class NotebookFilterParams(BaseModel):
     tags: list[str] = []
 
 
-class NotebookResponsePaginated(BaseModel):    
+class NotebookResponsePaginated(BaseModel):
     total: int
     limit: int
     offset: int
     items: list[NotebookResponse]
+
+
+class FlashcardRequest(BaseModel):
+    front: str
+    back: str
+    notebook_id: UUID
+
+
+class ReviewRequest(BaseModel):
+    review_quality: int
+
+
+class FlashcardResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    notebook_id: UUID
+    front: str
+    back: str
+    due_date: datetime

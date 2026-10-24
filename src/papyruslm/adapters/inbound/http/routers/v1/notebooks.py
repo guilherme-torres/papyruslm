@@ -5,17 +5,20 @@ from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, Query, status
 
 from papyruslm.adapters.inbound.http.routers.v1.schemas import (
+    FlashcardResponse,
     NotebookFilterParams,
     NotebookRequest,
     NotebookResponse,
     NotebookResponsePaginated,
 )
 from papyruslm.application.dto import CreateNotebookInput, UpdateNotebookInput
-from papyruslm.application.use_cases.create_notebook import CreateNotebookUseCase
-from papyruslm.application.use_cases.delete_notebook import DeleteNotebookUseCase
-from papyruslm.application.use_cases.list_notebooks import ListNotebooksUseCase
-from papyruslm.application.use_cases.update_notebook import UpdateNotebookUseCase
-
+from papyruslm.application.use_cases import (
+    CreateNotebookUseCase,
+    ListNotebooksUseCase,
+    UpdateNotebookUseCase,
+    DeleteNotebookUseCase,
+    FindNextDueUseCase,
+)
 
 router = APIRouter(prefix="/notebooks", tags=["notebooks"], route_class=DishkaRoute)
 
@@ -59,3 +62,14 @@ async def delete_notebook(
     use_case: FromDishka[DeleteNotebookUseCase],
 ) -> None:
     await use_case.execute(id)
+
+
+@router.get("/{id}/flashcards/next-due")
+async def find_next_due(
+    id: UUID,
+    use_case: FromDishka[FindNextDueUseCase],
+) -> FlashcardResponse | None:
+    flashcard = await use_case.execute(id)
+    if flashcard is None:
+        return None
+    return FlashcardResponse.model_validate(flashcard)

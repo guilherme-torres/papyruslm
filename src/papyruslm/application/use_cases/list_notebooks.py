@@ -1,16 +1,10 @@
 from papyruslm.application.dto import ListNotebookOutput
-from papyruslm.application.ports.repositories.flashcard_repository import FlashcardRepository
-from papyruslm.application.ports.repositories.notebook_repository import NotebookRepository
+from papyruslm.domain.repositories import NotebookRepository
 
 
 class ListNotebooksUseCase:
-    def __init__(
-        self,
-        notebook_repository: NotebookRepository,
-        flashcard_repository: FlashcardRepository,
-    ):
+    def __init__(self, notebook_repository: NotebookRepository):
         self._notebook_repository = notebook_repository
-        self._flashcard_repository = flashcard_repository
 
     async def execute(
         self,

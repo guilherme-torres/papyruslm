@@ -2,10 +2,10 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from papyruslm.application.dto import FlashcardOutput
-from papyruslm.application.ports.repositories.flashcard_repository import FlashcardRepository
+from papyruslm.domain.repositories import FlashcardRepository
 
 
-class FindNextDue:
+class FindNextDueUseCase:
     def __init__(self, flashcard_repository: FlashcardRepository):
         self._flashcard_repository = flashcard_repository
 

@@ -1,13 +1,10 @@
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.dialects.sqlite import insert
-from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from papyruslm.adapters.outbound.database.models import SQLAlchemyNotebook, SQLAlchemyTag
-from papyruslm.application.exceptions import NotebookNotFound
 from papyruslm.domain.entities import Notebook, Tag
 
 
@@ -31,12 +28,11 @@ class SQLAlchemyNotebookRepository:
     ) -> tuple[list[Notebook], int]:
         stmt = (
             select(SQLAlchemyNotebook)
-            .options(selectinload(SQLAlchemyNotebook.tags))
             .order_by(SQLAlchemyNotebook.created_at.desc(), SQLAlchemyNotebook.id)
             .limit(limit)
             .offset(offset)
         )
-        count_stmt = select(func.count).select_from(SQLAlchemyNotebook)
+        count_stmt = select(func.count()).select_from(SQLAlchemyNotebook)
         if tags:
             stmt = stmt.where(SQLAlchemyNotebook.tags.any(SQLAlchemyTag.name.in_(tags)))
             count_stmt = count_stmt.where(SQLAlchemyNotebook.tags.any(SQLAlchemyTag.name.in_(tags)))
@@ -44,33 +40,29 @@ class SQLAlchemyNotebookRepository:
         total = await self._session.scalar(count_stmt)
         return [notebook_db.to_entity() for notebook_db in result], total
 
-    async def update_notebook(self, notebook: Notebook) -> Notebook:
-        try:
-            notebook_db = await self._get_model(notebook.id)
-        except NoResultFound as e:
-            raise NotebookNotFound(notebook.id) from e
+    async def update_notebook(self, notebook: Notebook) -> Notebook | None:
+        notebook_db = await self._get_model(notebook.id)
+        if notebook_db is None:
+            return None
         notebook_db.name = notebook.name
         notebook_db.tags = await self._get_or_create_tags(notebook.tags)
         await self._session.commit()
         await self._session.refresh(notebook_db)
         return notebook_db.to_entity()
 
-    async def delete_notebook(self, id: UUID) -> None:
-        try:
-            model = await self._get_model(id)
-        except NoResultFound as e:
-            raise NotebookNotFound(id) from e
-        await self._session.delete(model)
-        await self._session.commit()
-
-    async def _get_model(self, id: UUID) -> SQLAlchemyNotebook:
-        stmt = (
-            select(SQLAlchemyNotebook)
-            .where(SQLAlchemyNotebook.id == id)
-            .options(selectinload(SQLAlchemyNotebook.tags))
+    async def delete_notebook(self, id: UUID) -> bool:
+        result = await self._session.execute(
+            delete(SQLAlchemyNotebook).where(SQLAlchemyNotebook.id == id)
         )
-        result = await self._session.scalars(stmt)
-        return result.one()
+        await self._session.commit()
+        return result.rowcount > 0
+
+    async def exists_by_id(self, id: UUID) -> bool:
+        stmt = select(SQLAlchemyNotebook.id).where(SQLAlchemyNotebook.id == id)
+        return await self._session.scalar(stmt) is not None
+
+    async def _get_model(self, id: UUID) -> SQLAlchemyNotebook | None:
+        return await self._session.get(SQLAlchemyNotebook, id)
 
     async def _get_or_create_tags(self, tags: list[Tag]) -> list[SQLAlchemyTag]:
         tags_by_name: dict[str, Tag] = {}
@@ -78,7 +70,6 @@ class SQLAlchemyNotebookRepository:
             tags_by_name.setdefault(tag.name, tag)
         if not tags_by_name:
             return []
-
         names = list(tags_by_name)
         unique_tags = tags_by_name.values()
         await self._session.execute(

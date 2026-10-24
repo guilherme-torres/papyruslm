@@ -5,12 +5,18 @@ from dishka.integrations.fastapi import FastapiProvider
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from papyruslm.adapters.outbound.database.sqlite import SQLiteDatabaseManager
-from papyruslm.adapters.outbound.repositories.notebook_repository import SQLAlchemyNotebookRepository
-from papyruslm.application.ports.repositories.notebook_repository import NotebookRepository
-from papyruslm.application.use_cases.create_notebook import CreateNotebookUseCase
-from papyruslm.application.use_cases.delete_notebook import DeleteNotebookUseCase
-from papyruslm.application.use_cases.list_notebooks import ListNotebooksUseCase
-from papyruslm.application.use_cases.update_notebook import UpdateNotebookUseCase
+from papyruslm.adapters.outbound.repositories import SQLAlchemyNotebookRepository, SQLAlchemyFlashcardRepository
+from papyruslm.domain.repositories import NotebookRepository, FlashcardRepository
+from papyruslm.application.use_cases import (
+    CreateNotebookUseCase,
+    DeleteNotebookUseCase,
+    ListNotebooksUseCase,
+    UpdateNotebookUseCase,
+    CreateFlashcardUseCase,
+    ReviewFlashcardUseCase,
+    FindNextDueUseCase,
+    DeleteFlashcardUseCase,
+)
 from papyruslm.settings import Settings, get_settings
 
 
@@ -37,11 +43,21 @@ class AppProvider(Provider):
         scope=Scope.REQUEST,
     )
 
+    flashcard_repository = provide(
+        SQLAlchemyFlashcardRepository,
+        provides=FlashcardRepository,
+        scope=Scope.REQUEST,
+    )
+
     use_cases = provide_all(
         CreateNotebookUseCase,
         ListNotebooksUseCase,
         UpdateNotebookUseCase,
         DeleteNotebookUseCase,
+        CreateFlashcardUseCase,
+        ReviewFlashcardUseCase,
+        FindNextDueUseCase,
+        DeleteFlashcardUseCase,
         scope=Scope.REQUEST,
     )
 

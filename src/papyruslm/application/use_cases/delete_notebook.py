@@ -1,6 +1,7 @@
 import uuid
 
-from papyruslm.application.ports.repositories.notebook_repository import NotebookRepository
+from papyruslm.application.exceptions import NotebookNotFound
+from papyruslm.domain.repositories import NotebookRepository
 
 
 class DeleteNotebookUseCase:
@@ -8,4 +9,5 @@ class DeleteNotebookUseCase:
         self._notebook_repository = notebook_repository
 
     async def execute(self, id: uuid.UUID) -> None:
-        return await self._notebook_repository.delete_notebook(id)
+        if not await self._notebook_repository.delete_notebook(id):
+            raise NotebookNotFound(id)
