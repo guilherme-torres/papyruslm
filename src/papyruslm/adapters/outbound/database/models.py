@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import Column, ForeignKey, String, Table, Text, func
+from sqlalchemy import Column, ForeignKey, Index, String, Table, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from papyruslm.adapters.outbound.database.types import UTCDateTime
@@ -47,6 +47,7 @@ class SQLAlchemyTag(Base):
 
 class SQLAlchemyFlashcard(Base):
     __tablename__ = "flashcards"
+    __table_args__ = (Index("ix_flashcards_notebook_due", "notebook_id", "due_date"),)
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
     front: Mapped[str] = mapped_column(Text)

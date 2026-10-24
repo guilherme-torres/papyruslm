@@ -26,11 +26,18 @@ class UpdateNotebookInput:
 
 
 @dataclass(frozen=True)
+class NotebookListItem:
+    notebook: Notebook
+    flashcards_total: int
+    flashcards_due: int
+
+
+@dataclass(frozen=True)
 class ListNotebookOutput:
     total: int
     limit: int
     offset: int
-    items: list[Notebook]
+    items: list[NotebookListItem]
 
 
 @dataclass(frozen=True)
@@ -53,6 +60,21 @@ class FlashcardOutput:
 
 
 @dataclass(frozen=True)
+class ListFlashcardsOutput:
+    total: int
+    limit: int
+    offset: int
+    items: list[FlashcardOutput]
+
+
+@dataclass(frozen=True)
 class ReviewFlashcardInput:
     flashcard_id: UUID
     review_quality: int
+
+
+@dataclass(frozen=True)
+class UpdateFlashcardInput:
+    flashcard_id: UUID
+    front: str
+    back: str

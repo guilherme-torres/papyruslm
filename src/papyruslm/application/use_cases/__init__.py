@@ -3,8 +3,10 @@ from papyruslm.application.use_cases.create_notebook import CreateNotebookUseCas
 from papyruslm.application.use_cases.delete_flashcard import DeleteFlashcardUseCase
 from papyruslm.application.use_cases.delete_notebook import DeleteNotebookUseCase
 from papyruslm.application.use_cases.find_next_due import FindNextDueUseCase
+from papyruslm.application.use_cases.list_flashcards import ListFlashcardsUseCase
 from papyruslm.application.use_cases.list_notebooks import ListNotebooksUseCase
 from papyruslm.application.use_cases.review_flashcard import ReviewFlashcardUseCase
+from papyruslm.application.use_cases.update_flashcard import UpdateFlashcardUseCase
 from papyruslm.application.use_cases.update_notebook import UpdateNotebookUseCase
 
 
@@ -14,7 +16,9 @@ __all__ = [
     "DeleteFlashcardUseCase",
     "DeleteNotebookUseCase",
     "FindNextDueUseCase",
+    "ListFlashcardsUseCase",
     "ListNotebooksUseCase",
     "ReviewFlashcardUseCase",
+    "UpdateFlashcardUseCase",
     "UpdateNotebookUseCase",
 ]

@@ -16,6 +16,8 @@ from papyruslm.application.use_cases import (
     ReviewFlashcardUseCase,
     FindNextDueUseCase,
     DeleteFlashcardUseCase,
+    ListFlashcardsUseCase,
+    UpdateFlashcardUseCase,
 )
 from papyruslm.settings import Settings, get_settings
 
@@ -58,6 +60,8 @@ class AppProvider(Provider):
         ReviewFlashcardUseCase,
         FindNextDueUseCase,
         DeleteFlashcardUseCase,
+        ListFlashcardsUseCase,
+        UpdateFlashcardUseCase,
         scope=Scope.REQUEST,
     )
 

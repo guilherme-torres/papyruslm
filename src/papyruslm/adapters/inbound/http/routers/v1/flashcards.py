@@ -6,13 +6,19 @@ from fastapi import APIRouter, status
 from papyruslm.adapters.inbound.http.routers.v1.schemas import (
     FlashcardRequest,
     FlashcardResponse,
+    FlashcardUpdateRequest,
     ReviewRequest,
 )
-from papyruslm.application.dto import CreateFlashcardInput, ReviewFlashcardInput
+from papyruslm.application.dto import (
+    CreateFlashcardInput,
+    ReviewFlashcardInput,
+    UpdateFlashcardInput,
+)
 from papyruslm.application.use_cases import (
     CreateFlashcardUseCase,
     ReviewFlashcardUseCase,
     DeleteFlashcardUseCase,
+    UpdateFlashcardUseCase,
 )
 
 router = APIRouter(prefix="/flashcards", tags=["flashcards"], route_class=DishkaRoute)
@@ -25,6 +31,18 @@ async def create_flashcard(
 ) -> FlashcardResponse:
     flashcard = await use_case.execute(
         CreateFlashcardInput(front=body.front, back=body.back, notebook_id=body.notebook_id)
+    )
+    return FlashcardResponse.model_validate(flashcard)
+
+
+@router.put("/{id}")
+async def update_flashcard(
+    id: UUID,
+    body: FlashcardUpdateRequest,
+    use_case: FromDishka[UpdateFlashcardUseCase],
+) -> FlashcardResponse:
+    flashcard = await use_case.execute(
+        UpdateFlashcardInput(flashcard_id=id, front=body.front, back=body.back)
     )
     return FlashcardResponse.model_validate(flashcard)
 
