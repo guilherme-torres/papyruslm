@@ -16,6 +16,10 @@ class TagResponse(BaseModel):
     name: str
 
 
+class ListTagsResponse(BaseModel):
+    items: list[TagResponse]
+
+
 class NotebookResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

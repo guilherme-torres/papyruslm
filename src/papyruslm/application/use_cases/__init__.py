@@ -8,6 +8,7 @@ from papyruslm.application.use_cases.list_notebooks import ListNotebooksUseCase
 from papyruslm.application.use_cases.review_flashcard import ReviewFlashcardUseCase
 from papyruslm.application.use_cases.update_flashcard import UpdateFlashcardUseCase
 from papyruslm.application.use_cases.update_notebook import UpdateNotebookUseCase
+from papyruslm.application.use_cases.list_tags import ListTagsUseCase
 
 
 __all__ = [
@@ -21,4 +22,5 @@ __all__ = [
     "ReviewFlashcardUseCase",
     "UpdateFlashcardUseCase",
     "UpdateNotebookUseCase",
+    "ListTagsUseCase",
 ]
