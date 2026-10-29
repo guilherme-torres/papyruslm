@@ -38,6 +38,7 @@ class AppProvider(Provider):
 
     @provide(scope=Scope.APP)
     async def database(self, settings: Settings) -> AsyncIterator[SQLiteDatabaseManager]:
+        settings.db_path.parent.mkdir(parents=True, exist_ok=True)
         db = SQLiteDatabaseManager(settings.db_url, echo=settings.db_echo)
         await db.connect()
         yield db

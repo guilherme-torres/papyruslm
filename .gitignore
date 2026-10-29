@@ -16,4 +16,6 @@ wheels/
 *.db-shm
 *.db-wal
 
+data/
+
 node_modules

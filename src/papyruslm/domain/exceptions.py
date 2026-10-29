@@ -45,3 +45,35 @@ class ReviewNotDue(DomainException):
     def __init__(self, next_review_date: datetime):
         self.next_review_date = next_review_date
         super().__init__(f"Flashcard is not due for review until {next_review_date.isoformat()}")
+
+
+class UnsupportedMimeType(DomainValidationError):
+    def __init__(self, mime_type: str):
+        self.mime_type = mime_type
+        super().__init__(f"Unsupported file type: {mime_type}")
+
+
+class FileTooLarge(DomainValidationError):
+    def __init__(self, size_bytes: int, max_size_bytes: int):
+        self.size_bytes = size_bytes
+        self.max_size_bytes = max_size_bytes
+        super().__init__(f"File must have at most {max_size_bytes} bytes, got {size_bytes}")
+
+
+class InvalidStatusTransition(DomainException):
+    def __init__(self, current: str, target: str):
+        self.current = current
+        self.target = target
+        super().__init__(f"Cannot change status from {current} to {target}")
+
+
+class InvalidTextRange(DomainValidationError):
+    def __init__(self, start: int, end: int):
+        self.start = start
+        self.end = end
+        super().__init__(f"Invalid text range: [{start}, {end})")
+
+
+class UserMessageWithSources(DomainValidationError):
+    def __init__(self):
+        super().__init__("User messages must not have citations or a model")

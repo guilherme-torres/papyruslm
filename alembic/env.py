@@ -14,7 +14,9 @@ from papyruslm.settings import get_settings
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option("sqlalchemy.url", get_settings().db_url)
+settings = get_settings()
+settings.db_path.parent.mkdir(parents=True, exist_ok=True)
+config.set_main_option("sqlalchemy.url", settings.db_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

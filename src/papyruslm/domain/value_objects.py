@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from uuid import UUID
 
 from papyruslm.domain.exceptions import InvalidReviewQuality
 
@@ -14,3 +15,14 @@ class ReviewQuality:
     @property
     def is_failure(self) -> bool:
         return self.value < 3
+
+
+@dataclass(frozen=True)
+class Citation:
+    index: int
+    document_id: UUID
+    document_name: str
+    start: int
+    end: int
+    excerpt: str
+    content_checksum: str
