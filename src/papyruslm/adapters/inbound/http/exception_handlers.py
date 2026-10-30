@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from papyruslm.application.exceptions import (
     CitationNotFound,
     CitationSourceUnavailable,
+    DocumentContentNotFound,
     DocumentNotFound,
     FileStorageError,
     FlashcardNotFound,
@@ -55,6 +56,7 @@ def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(NotebookNotFound, not_found_handler)
     app.add_exception_handler(FlashcardNotFound, not_found_handler)
     app.add_exception_handler(DocumentNotFound, not_found_handler)
+    app.add_exception_handler(DocumentContentNotFound, not_found_handler)
     app.add_exception_handler(MessageNotFound, not_found_handler)
     app.add_exception_handler(CitationNotFound, not_found_handler)
     app.add_exception_handler(CitationSourceUnavailable, not_found_handler)

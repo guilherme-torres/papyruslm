@@ -9,6 +9,7 @@ export const notebookKeys = {
     all: ['notebooks'] as const,
     lists: () => [...notebookKeys.all, 'list'] as const,
     list: (params: ListNotebooksParams) => [...notebookKeys.lists(), params] as const,
+    detail: (id: string) => [...notebookKeys.all, 'detail', id] as const,
 }
 
 export const flashcardKeys = {
@@ -21,6 +22,8 @@ export const flashcardKeys = {
 export const documentKeys = {
     all: ['documents'] as const,
     notebook: (notebookId: string) => [...documentKeys.all, notebookId] as const,
+    list: (notebookId: string) => [...documentKeys.notebook(notebookId), 'list'] as const,
+    content: (notebookId: string, documentId: string) => [...documentKeys.notebook(notebookId), 'content', documentId] as const,
 }
 
 export const messageKeys = {

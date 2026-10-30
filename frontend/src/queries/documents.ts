@@ -1,6 +1,7 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
     deleteDocument,
+    getDocumentContent,
     listDocuments,
     reprocessDocument,
     uploadDocument,
@@ -14,12 +15,20 @@ const IN_PROGRESS_STATUSES: DocumentStatus[] = ['pending', 'processing']
 
 export function documentsQueryOptions(notebookId: string) {
     return queryOptions({
-        queryKey: documentKeys.notebook(notebookId),
+        queryKey: documentKeys.list(notebookId),
         queryFn: ({ signal }) => listDocuments(notebookId, signal),
         refetchInterval: (query) =>
             query.state.data?.some((document) => IN_PROGRESS_STATUSES.includes(document.status))
                 ? PROCESSING_POLL_INTERVAL_MS
                 : false,
+    })
+}
+
+export function documentContentQueryOptions(notebookId: string, documentId: string) {
+    return queryOptions({
+        queryKey: documentKeys.content(notebookId, documentId),
+        queryFn: ({ signal }) => getDocumentContent(documentId, signal),
+        staleTime: Infinity,
     })
 }
 

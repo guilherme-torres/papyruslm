@@ -22,6 +22,12 @@ class DocumentNotFound(ApplicationException):
         super().__init__(f"Document {id} not found")
 
 
+class DocumentContentNotFound(ApplicationException):
+    def __init__(self, document_id: UUID):
+        self.document_id = document_id
+        super().__init__(f"Content of document {document_id} not found")
+
+
 class MessageNotFound(ApplicationException):
     def __init__(self, id: UUID):
         self.id = id

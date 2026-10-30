@@ -50,6 +50,8 @@ from papyruslm.application.use_cases import (
     DeleteNotebookUseCase,
     FindNextDueUseCase,
     GetCitationSourceUseCase,
+    GetDocumentContentUseCase,
+    GetNotebookUseCase,
     ListDocumentsUseCase,
     ListFlashcardsUseCase,
     ListMessagesUseCase,
@@ -132,6 +134,7 @@ class ApiProvider(Provider):
 
     use_cases = provide_all(
         CreateNotebookUseCase,
+        GetNotebookUseCase,
         ListNotebooksUseCase,
         UpdateNotebookUseCase,
         DeleteNotebookUseCase,
@@ -144,6 +147,7 @@ class ApiProvider(Provider):
         ListTagsUseCase,
         AddDocumentUseCase,
         ListDocumentsUseCase,
+        GetDocumentContentUseCase,
         DeleteDocumentUseCase,
         AskQuestionUseCase,
         ListMessagesUseCase,

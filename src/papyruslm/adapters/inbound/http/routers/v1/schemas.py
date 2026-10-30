@@ -95,6 +95,13 @@ class DocumentResponse(BaseModel):
     created_at: datetime
 
 
+class DocumentContentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    document_id: UUID
+    text: str
+
+
 class CitationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

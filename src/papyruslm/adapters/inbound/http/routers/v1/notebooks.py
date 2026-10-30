@@ -17,6 +17,7 @@ from papyruslm.adapters.inbound.http.routers.v1.schemas import (
 from papyruslm.application.dto import CreateNotebookInput, UpdateNotebookInput
 from papyruslm.application.use_cases import (
     CreateNotebookUseCase,
+    GetNotebookUseCase,
     ListNotebooksUseCase,
     UpdateNotebookUseCase,
     DeleteNotebookUseCase,
@@ -55,6 +56,15 @@ async def list_notebooks(
             for item in response.items
         ],
     )
+
+
+@router.get("/{id}")
+async def get_notebook(
+    id: UUID,
+    use_case: FromDishka[GetNotebookUseCase],
+) -> NotebookResponse:
+    notebook = await use_case.execute(id)
+    return NotebookResponse.model_validate(notebook)
 
 
 @router.put("/{id}")

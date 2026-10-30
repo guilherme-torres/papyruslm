@@ -115,6 +115,12 @@ class DocumentOutput:
 
 
 @dataclass(frozen=True)
+class DocumentContentOutput:
+    document_id: UUID
+    text: str
+
+
+@dataclass(frozen=True)
 class RecoverStaleDocumentsOutput:
     requeued: int
     failed: int

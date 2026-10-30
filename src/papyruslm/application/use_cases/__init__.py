@@ -23,8 +23,12 @@ from papyruslm.application.use_cases.list_messages import ListMessagesUseCase
 from papyruslm.application.use_cases.get_citation_source import GetCitationSourceUseCase
 from papyruslm.application.use_cases.reprocess_document import ReprocessDocumentUseCase
 from papyruslm.application.use_cases.sync_vector_index import SyncVectorIndexUseCase
+from papyruslm.application.use_cases.get_notebook import GetNotebookUseCase
+from papyruslm.application.use_cases.get_document_content import GetDocumentContentUseCase
 
 __all__ = [
+    "GetNotebookUseCase",
+    "GetDocumentContentUseCase",
     "SyncVectorIndexUseCase",
     "ReprocessDocumentUseCase",
     "GetCitationSourceUseCase",

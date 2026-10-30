@@ -32,6 +32,10 @@ export function listNotebooks(params: ListNotebooksParams = {}, signal?: AbortSi
     return http.get('/notebooks', { query: { ...params }, signal })
 }
 
+export function getNotebook(id: string, signal?: AbortSignal): Promise<Notebook> {
+    return http.get(`/notebooks/${id}`, { signal, errorMessages: { 404: NOT_FOUND } })
+}
+
 export function createNotebook(input: NotebookInput): Promise<Notebook> {
     return http.post('/notebooks', input, { errorMessages: SAVE_ERRORS })
 }

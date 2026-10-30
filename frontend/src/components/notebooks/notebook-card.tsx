@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import { EllipsisVerticalIcon, PencilIcon, Trash2Icon } from 'lucide-react'
 import type { NotebookListItem } from '@/api/notebooks'
 import { DeleteNotebookDialog } from '@/components/notebooks/delete-notebook-dialog'
@@ -31,10 +32,22 @@ export function NotebookCard({ notebook }: NotebookCardProps) {
     return (
         <>
             <Tooltip>
-                <TooltipTrigger render={<Card className="h-full" />}>
+                <TooltipTrigger
+                    render={
+                        <Card className="relative h-full transition-colors hover:bg-muted/40 has-[a:focus-visible]:ring-3 has-[a:focus-visible]:ring-ring/50" />
+                    }
+                >
                     <CardHeader>
-                        <CardTitle className="min-w-0 truncate">{notebook.name}</CardTitle>
-                        <CardAction>
+                        <CardTitle className="min-w-0 truncate">
+                            <Link
+                                to="/notebooks/$notebookId"
+                                params={{ notebookId: notebook.id }}
+                                className="outline-none after:absolute after:inset-0"
+                            >
+                                {notebook.name}
+                            </Link>
+                        </CardTitle>
+                        <CardAction className="relative z-10">
                             <DropdownMenu>
                                 <DropdownMenuTrigger
                                     render={<Button variant="ghost" size="icon-sm" aria-label="Opções do caderno" />}

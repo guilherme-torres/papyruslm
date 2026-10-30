@@ -12,6 +12,11 @@ export interface NotebookDocument {
     created_at: string
 }
 
+export interface DocumentContent {
+    document_id: string
+    text: string
+}
+
 const NOT_FOUND = 'Documento não encontrado.'
 
 const UPLOAD_ERRORS: ErrorMessages = {
@@ -29,6 +34,13 @@ export function listDocuments(notebookId: string, signal?: AbortSignal): Promise
     return http.get(`/notebooks/${notebookId}/documents`, {
         signal,
         errorMessages: { 404: 'Caderno não encontrado.' },
+    })
+}
+
+export function getDocumentContent(id: string, signal?: AbortSignal): Promise<DocumentContent> {
+    return http.get(`/documents/${id}/content`, {
+        signal,
+        errorMessages: { 404: 'O texto deste documento ainda não está disponível.' },
     })
 }
 

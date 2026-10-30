@@ -3,11 +3,12 @@ from uuid import UUID
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, UploadFile, status
 
-from papyruslm.adapters.inbound.http.routers.v1.schemas import DocumentResponse
+from papyruslm.adapters.inbound.http.routers.v1.schemas import DocumentContentResponse, DocumentResponse
 from papyruslm.application.dto import AddDocumentInput
 from papyruslm.application.use_cases import (
     AddDocumentUseCase,
     DeleteDocumentUseCase,
+    GetDocumentContentUseCase,
     ListDocumentsUseCase,
     ReprocessDocumentUseCase,
 )
@@ -34,6 +35,15 @@ async def list_documents(
 ) -> list[DocumentResponse]:
     documents = await use_case.execute(id)
     return [DocumentResponse.model_validate(document) for document in documents]
+
+
+@router.get("/documents/{id}/content")
+async def get_document_content(
+    id: UUID,
+    use_case: FromDishka[GetDocumentContentUseCase],
+) -> DocumentContentResponse:
+    content = await use_case.execute(id)
+    return DocumentContentResponse.model_validate(content)
 
 
 @router.delete("/documents/{id}", status_code=status.HTTP_204_NO_CONTENT)

@@ -40,6 +40,10 @@ class SQLAlchemyNotebookRepository:
         total = await self._session.scalar(count_stmt)
         return [notebook_db.to_entity() for notebook_db in result], total
 
+    async def find_by_id(self, id: UUID) -> Notebook | None:
+        notebook_db = await self._get_model(id)
+        return notebook_db.to_entity() if notebook_db else None
+
     async def update_notebook(self, notebook: Notebook) -> Notebook | None:
         notebook_db = await self._get_model(notebook.id)
         if notebook_db is None:

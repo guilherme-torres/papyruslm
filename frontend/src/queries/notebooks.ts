@@ -2,6 +2,7 @@ import { keepPreviousData, queryOptions, useMutation, useQueryClient } from '@ta
 import {
     createNotebook,
     deleteNotebook,
+    getNotebook,
     listNotebooks,
     updateNotebook,
     type ListNotebooksParams,
@@ -19,6 +20,13 @@ export function notebooksQueryOptions(params: ListNotebooksParams = {}) {
         queryKey: notebookKeys.list(params),
         queryFn: ({ signal }) => listNotebooks(params, signal),
         placeholderData: keepPreviousData,
+    })
+}
+
+export function notebookQueryOptions(id: string) {
+    return queryOptions({
+        queryKey: notebookKeys.detail(id),
+        queryFn: ({ signal }) => getNotebook(id, signal),
     })
 }
 
