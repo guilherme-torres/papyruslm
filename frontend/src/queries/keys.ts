@@ -30,6 +30,7 @@ export const messageKeys = {
     all: ['messages'] as const,
     notebook: (notebookId: string) => [...messageKeys.all, notebookId] as const,
     list: (notebookId: string, params: PaginationParams) => [...messageKeys.notebook(notebookId), 'list', params] as const,
+    latest: (notebookId: string) => [...messageKeys.notebook(notebookId), 'latest'] as const,
     citationSource: (notebookId: string, messageId: string, index: number) =>
         [...messageKeys.notebook(notebookId), 'citation', messageId, index] as const,
 }

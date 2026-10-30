@@ -1,11 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { CircleAlertIcon } from 'lucide-react'
 import type { NotebookDocument } from '@/api/documents'
+import { TextSkeleton } from '@/components/documents/text-skeleton'
 import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
 import { documentContentQueryOptions } from '@/queries/documents'
 
 interface DocumentViewerProps {
@@ -13,20 +12,10 @@ interface DocumentViewerProps {
     document: NotebookDocument
 }
 
-const SKELETON_LINE_WIDTHS = ['w-full', 'w-11/12', 'w-full', 'w-4/5', 'w-full', 'w-2/3']
-
 export function DocumentViewer({ notebookId, document }: DocumentViewerProps) {
     const contentQuery = useQuery(documentContentQueryOptions(notebookId, document.id))
 
-    if (contentQuery.isPending) {
-        return (
-            <div aria-busy className="flex flex-col gap-2.5 p-4">
-                {SKELETON_LINE_WIDTHS.map((width, index) => (
-                    <Skeleton key={index} className={cn('h-4', width)} />
-                ))}
-            </div>
-        )
-    }
+    if (contentQuery.isPending) return <TextSkeleton />
 
     if (contentQuery.isError) {
         return (

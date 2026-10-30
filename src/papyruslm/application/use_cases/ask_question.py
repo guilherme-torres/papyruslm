@@ -52,10 +52,10 @@ class AskQuestionUseCase:
         )
 
         search_query = await self._search_query(history, question.content)
-        sources = await self._find_sources(data, search_query)
+        sources = self._chat_assistant.select_sources(search_query, await self._find_sources(data, search_query))
 
         parts: list[str] = []
-        async for token in self._chat_assistant.stream_answer(history, question.content, sources):
+        async for token in self._chat_assistant.stream_answer(history, search_query, sources):
             parts.append(token)
             yield AnswerDelta(token)
 

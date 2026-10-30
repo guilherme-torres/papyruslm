@@ -11,11 +11,26 @@ import {
 } from '@/api/messages'
 import { messageKeys } from '@/queries/keys'
 
+const LATEST_MESSAGES_LIMIT = 100
+
 export function messagesQueryOptions(notebookId: string, params: PaginationParams = {}) {
     return queryOptions({
         queryKey: messageKeys.list(notebookId, params),
         queryFn: ({ signal }) => listMessages(notebookId, params, signal),
         placeholderData: keepPreviousData,
+    })
+}
+
+export function latestMessagesQueryOptions(notebookId: string) {
+    return queryOptions({
+        queryKey: messageKeys.latest(notebookId),
+        queryFn: async ({ signal }) => {
+            const first = await listMessages(notebookId, { limit: LATEST_MESSAGES_LIMIT }, signal)
+            if (first.total <= LATEST_MESSAGES_LIMIT) return first.items
+            const offset = first.total - LATEST_MESSAGES_LIMIT
+            const latest = await listMessages(notebookId, { limit: LATEST_MESSAGES_LIMIT, offset }, signal)
+            return latest.items
+        },
     })
 }
 
@@ -38,6 +53,7 @@ export function useClearMessages(notebookId: string) {
 export function useAskQuestion(notebookId: string) {
     const queryClient = useQueryClient()
     const [answer, setAnswer] = useState('')
+    const [completedMessageId, setCompletedMessageId] = useState<string | null>(null)
     const controllerRef = useRef<AbortController | null>(null)
 
     useEffect(() => () => controllerRef.current?.abort(), [])
@@ -48,6 +64,7 @@ export function useAskQuestion(notebookId: string) {
             const controller = new AbortController()
             controllerRef.current = controller
             setAnswer('')
+            setCompletedMessageId(null)
             const events = askQuestion(notebookId, input, controller.signal)
             let result = await events.next()
             while (!result.done) {
@@ -55,13 +72,18 @@ export function useAskQuestion(notebookId: string) {
                 setAnswer((current) => current + text)
                 result = await events.next()
             }
+            setCompletedMessageId(result.value.id)
             return result.value
         },
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: messageKeys.notebook(notebookId) }),
-        onSettled: () => setAnswer(''),
+        onSettled: async () => {
+            await queryClient.invalidateQueries({ queryKey: messageKeys.notebook(notebookId) })
+            setAnswer('')
+        },
     })
 
     const cancel = () => controllerRef.current?.abort()
 
-    return { ...mutation, answer, cancel }
+    return { ...mutation, answer, completedMessageId, cancel }
 }
+
+export type AskQuestionState = ReturnType<typeof useAskQuestion>

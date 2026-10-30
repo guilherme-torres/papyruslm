@@ -4,6 +4,8 @@
 @import "@fontsource-variable/dm-sans";
 @import "@fontsource-variable/geist";
 
+@source "../node_modules/streamdown/dist/*.js";
+
 @custom-variant dark (&:is(.dark *));
 
 :root {

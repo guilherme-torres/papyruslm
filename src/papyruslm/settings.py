@@ -13,8 +13,8 @@ class Settings(BaseSettings):
     chat_model: str = "phi4-mini"
     chat_context_tokens: int = 8192
     embedding_model: str = "qwen3-embedding:0.6b"
-    chunk_size: int = 2000
-    chunk_overlap: int = 300
+    chunk_size: int = 1000
+    chunk_overlap: int = 200
     ocr_language: str = "por+eng"
     tessdata_path: Path | None = None
     whisper_model: str = "small"

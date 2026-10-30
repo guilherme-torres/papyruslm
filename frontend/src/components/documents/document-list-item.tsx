@@ -56,6 +56,7 @@ export function DocumentListItem({ notebookId, document, selected, onSelectedCha
                 variant="ghost"
                 size="icon-sm"
                 aria-label={`Excluir ${document.filename}`}
+                disabled={isInProgress}
                 onClick={() => setDeleteOpen(true)}
             >
                 <Trash2Icon />

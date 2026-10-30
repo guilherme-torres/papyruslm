@@ -2,15 +2,17 @@ import { useState } from 'react'
 import { useQuery, type UseQueryResult } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
 import { ArrowLeftIcon, CircleAlertIcon, NotebookTabsIcon, PanelLeftIcon, PanelRightIcon } from 'lucide-react'
+import type { NotebookDocument } from '@/api/documents'
 import type { Notebook } from '@/api/notebooks'
 import { ApiError } from '@/api/client'
-import { DocumentsPanel, type DocumentsPanelProps } from '@/components/documents/documents-panel'
+import { ChatPanel, type ChatPanelProps } from '@/components/chat/chat-panel'
+import type { CitationTarget } from '@/components/documents/citation-source-panel'
+import { DocumentsPanel, type DocumentsPanelProps, type DocumentsViewer } from '@/components/documents/documents-panel'
 import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ChatPanel } from '@/components/workspace/chat-panel'
 import { FlashcardsPanel } from '@/components/workspace/flashcards-panel'
 import { CollapsedPanel } from '@/components/workspace/panel'
 import { useDocumentSelection } from '@/hooks/use-document-selection'
@@ -18,18 +20,26 @@ import { useFailedDocumentToasts } from '@/hooks/use-failed-document-toasts'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { cn } from '@/lib/utils'
 import { documentsQueryOptions } from '@/queries/documents'
+import { useAskQuestion } from '@/queries/messages'
 import { notebookQueryOptions } from '@/queries/notebooks'
 
 const route = getRouteApi('/notebooks/$notebookId')
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 1024px)'
 
+type ViewerState = { type: 'document'; documentId: string } | { type: 'citation'; target: CitationTarget }
+
+type MobileTab = 'documents' | 'chat' | 'flashcards'
+
 export function NotebookPage() {
     const { notebookId } = route.useParams()
     const notebookQuery = useQuery(notebookQueryOptions(notebookId))
     const documentsQuery = useQuery(documentsQueryOptions(notebookId))
     const selection = useDocumentSelection(documentsQuery.data)
-    const [viewingDocumentId, setViewingDocumentId] = useState<string | null>(null)
+    const chat = useAskQuestion(notebookId)
+    const [viewerState, setViewerState] = useState<ViewerState | null>(null)
+    const [documentsOpen, setDocumentsOpen] = useState(true)
+    const [mobileTab, setMobileTab] = useState<MobileTab>('chat')
     const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY)
     useFailedDocumentToasts(documentsQuery.data)
 
@@ -37,28 +47,57 @@ export function NotebookPage() {
         return <NotebookError error={notebookQuery.error} onRetry={() => void notebookQuery.refetch()} />
     }
 
-    const viewingDocument = documentsQuery.data?.find(
-        (document) => document.id === viewingDocumentId && document.status === 'ready',
-    )
+    const viewer = resolveViewer(viewerState, documentsQuery.data)
+
+    const openCitation = (target: CitationTarget) => {
+        setViewerState({ type: 'citation', target })
+        setDocumentsOpen(true)
+        setMobileTab('documents')
+    }
 
     const documentsPanelProps: DocumentsPanelProps = {
         notebookId,
         documentsQuery,
         selection,
-        viewingDocument,
-        onViewingDocumentChange: setViewingDocumentId,
+        viewer,
+        onOpenDocument: (documentId) => setViewerState({ type: 'document', documentId }),
+        onCloseViewer: () => setViewerState(null),
+    }
+
+    const chatPanelProps: ChatPanelProps = {
+        notebookId,
+        chat,
+        selectedDocumentIds: selection.selectedIds,
+        onOpenCitation: openCitation,
     }
 
     return (
         <div className="flex h-full min-h-0 flex-col gap-3 p-3 sm:p-4">
             <NotebookHeader notebookQuery={notebookQuery} />
             {isDesktop ? (
-                <DesktopWorkspace documentsPanelProps={documentsPanelProps} selectedSourcesCount={selection.selectedIds.length} />
+                <DesktopWorkspace
+                    documentsPanelProps={documentsPanelProps}
+                    chatPanelProps={chatPanelProps}
+                    documentsOpen={documentsOpen}
+                    onDocumentsOpenChange={setDocumentsOpen}
+                />
             ) : (
-                <MobileWorkspace documentsPanelProps={documentsPanelProps} selectedSourcesCount={selection.selectedIds.length} />
+                <MobileWorkspace
+                    documentsPanelProps={documentsPanelProps}
+                    chatPanelProps={chatPanelProps}
+                    tab={mobileTab}
+                    onTabChange={setMobileTab}
+                />
             )}
         </div>
     )
+}
+
+function resolveViewer(state: ViewerState | null, documents: NotebookDocument[] | undefined): DocumentsViewer | null {
+    if (state?.type === 'citation') return state
+    if (state?.type !== 'document') return null
+    const document = documents?.find((candidate) => candidate.id === state.documentId && candidate.status === 'ready')
+    return document ? { type: 'document', document } : null
 }
 
 interface NotebookHeaderProps {
@@ -86,13 +125,14 @@ function NotebookHeader({ notebookQuery }: NotebookHeaderProps) {
     )
 }
 
-interface WorkspaceProps {
+interface DesktopWorkspaceProps {
     documentsPanelProps: DocumentsPanelProps
-    selectedSourcesCount: number
+    chatPanelProps: ChatPanelProps
+    documentsOpen: boolean
+    onDocumentsOpenChange: (open: boolean) => void
 }
 
-function DesktopWorkspace({ documentsPanelProps, selectedSourcesCount }: WorkspaceProps) {
-    const [documentsOpen, setDocumentsOpen] = useState(true)
+function DesktopWorkspace({ documentsPanelProps, chatPanelProps, documentsOpen, onDocumentsOpenChange }: DesktopWorkspaceProps) {
     const [flashcardsOpen, setFlashcardsOpen] = useState(true)
 
     return (
@@ -100,10 +140,10 @@ function DesktopWorkspace({ documentsPanelProps, selectedSourcesCount }: Workspa
             {documentsOpen ? (
                 <DocumentsPanel
                     {...documentsPanelProps}
-                    onCollapse={() => setDocumentsOpen(false)}
+                    onCollapse={() => onDocumentsOpenChange(false)}
                     className={cn(
                         'w-80 shrink-0 xl:w-96',
-                        documentsPanelProps.viewingDocument && 'w-[28rem] xl:w-[36rem]',
+                        documentsPanelProps.viewer && 'w-md xl:w-xl',
                     )}
                 />
             ) : (
@@ -111,11 +151,11 @@ function DesktopWorkspace({ documentsPanelProps, selectedSourcesCount }: Workspa
                     label="Documentos"
                     expandLabel="Abrir painel de documentos"
                     side="left"
-                    onExpand={() => setDocumentsOpen(true)}
+                    onExpand={() => onDocumentsOpenChange(true)}
                     icon={<PanelLeftIcon />}
                 />
             )}
-            <ChatPanel selectedSourcesCount={selectedSourcesCount} className="min-w-0 flex-1" />
+            <ChatPanel {...chatPanelProps} className="min-w-0 flex-1" />
             {flashcardsOpen ? (
                 <FlashcardsPanel onCollapse={() => setFlashcardsOpen(false)} className="w-80 shrink-0 xl:w-96" />
             ) : (
@@ -131,9 +171,16 @@ function DesktopWorkspace({ documentsPanelProps, selectedSourcesCount }: Workspa
     )
 }
 
-function MobileWorkspace({ documentsPanelProps, selectedSourcesCount }: WorkspaceProps) {
+interface MobileWorkspaceProps {
+    documentsPanelProps: DocumentsPanelProps
+    chatPanelProps: ChatPanelProps
+    tab: MobileTab
+    onTabChange: (tab: MobileTab) => void
+}
+
+function MobileWorkspace({ documentsPanelProps, chatPanelProps, tab, onTabChange }: MobileWorkspaceProps) {
     return (
-        <Tabs defaultValue="chat" className="min-h-0 flex-1">
+        <Tabs value={tab} onValueChange={(value: MobileTab) => onTabChange(value)} className="min-h-0 flex-1">
             <TabsList className="w-full shrink-0">
                 <TabsTrigger value="documents">Documentos</TabsTrigger>
                 <TabsTrigger value="chat">Chat</TabsTrigger>
@@ -143,7 +190,7 @@ function MobileWorkspace({ documentsPanelProps, selectedSourcesCount }: Workspac
                 <DocumentsPanel {...documentsPanelProps} className="flex-1" />
             </TabsContent>
             <TabsContent value="chat" className="flex min-h-0">
-                <ChatPanel selectedSourcesCount={selectedSourcesCount} className="flex-1" />
+                <ChatPanel {...chatPanelProps} className="flex-1" />
             </TabsContent>
             <TabsContent value="flashcards" className="flex min-h-0">
                 <FlashcardsPanel className="flex-1" />

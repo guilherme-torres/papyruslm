@@ -1,6 +1,7 @@
 import type { UseQueryResult } from '@tanstack/react-query'
 import { CircleAlertIcon, FilesIcon, Minimize2Icon, PanelLeftCloseIcon } from 'lucide-react'
 import type { NotebookDocument } from '@/api/documents'
+import { CitationSourcePanel, type CitationTarget } from '@/components/documents/citation-source-panel'
 import { DocumentListItem } from '@/components/documents/document-list-item'
 import { DocumentViewer } from '@/components/documents/document-viewer'
 import { UploadDocumentsDialog } from '@/components/documents/upload-documents-dialog'
@@ -14,12 +15,17 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Panel, PanelAction } from '@/components/workspace/panel'
 import type { DocumentSelection } from '@/hooks/use-document-selection'
 
+export type DocumentsViewer =
+    | { type: 'document'; document: NotebookDocument }
+    | { type: 'citation'; target: CitationTarget }
+
 export interface DocumentsPanelProps {
     notebookId: string
     documentsQuery: UseQueryResult<NotebookDocument[], Error>
     selection: DocumentSelection
-    viewingDocument: NotebookDocument | undefined
-    onViewingDocumentChange: (documentId: string | null) => void
+    viewer: DocumentsViewer | null
+    onOpenDocument: (documentId: string) => void
+    onCloseViewer: () => void
     onCollapse?: () => void
     className?: string
 }
@@ -28,23 +34,36 @@ export function DocumentsPanel({
     notebookId,
     documentsQuery,
     selection,
-    viewingDocument,
-    onViewingDocumentChange,
+    viewer,
+    onOpenDocument,
+    onCloseViewer,
     onCollapse,
     className,
 }: DocumentsPanelProps) {
-    if (viewingDocument) {
+    if (viewer?.type === 'citation') {
+        return (
+            <CitationSourcePanel
+                key={`${viewer.target.messageId}-${viewer.target.index}`}
+                notebookId={notebookId}
+                target={viewer.target}
+                onClose={onCloseViewer}
+                className={className}
+            />
+        )
+    }
+
+    if (viewer?.type === 'document') {
         return (
             <Panel
-                title={viewingDocument.filename}
+                title={viewer.document.filename}
                 className={className}
                 action={
-                    <PanelAction label="Fechar documento" onClick={() => onViewingDocumentChange(null)}>
+                    <PanelAction label="Fechar documento" onClick={onCloseViewer}>
                         <Minimize2Icon />
                     </PanelAction>
                 }
             >
-                <DocumentViewer key={viewingDocument.id} notebookId={notebookId} document={viewingDocument} />
+                <DocumentViewer key={viewer.document.id} notebookId={notebookId} document={viewer.document} />
             </Panel>
         )
     }
@@ -68,7 +87,7 @@ export function DocumentsPanel({
                 notebookId={notebookId}
                 documentsQuery={documentsQuery}
                 selection={selection}
-                onOpen={(documentId) => onViewingDocumentChange(documentId)}
+                onOpen={onOpenDocument}
             />
         </Panel>
     )

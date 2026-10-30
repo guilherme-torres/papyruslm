@@ -40,8 +40,12 @@ def rewrite_user_prompt(conversation: list[tuple[str, str]], question: str) -> s
 def answer_system_prompt(sources: list[Source]) -> str:
     if not sources:
         return NO_SOURCES_PROMPT
-    formatted = "\n\n".join(f"[{source.index}] ({source.document_name})\n{source.chunk.text}" for source in sources)
+    formatted = "\n\n".join(format_source(source) for source in sources)
     return f"{ANSWER_SYSTEM_PROMPT}\n\nFontes:\n\n{formatted}"
+
+
+def format_source(source: Source) -> str:
+    return f"[{source.index}] ({source.document_name})\n{source.chunk.text}"
 
 
 def strip_citation_markers(text: str) -> str:

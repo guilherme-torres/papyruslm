@@ -4,8 +4,10 @@ from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, System
 from langchain_ollama import ChatOllama
 
 from papyruslm.adapters.outbound.chat.prompts import (
+    ANSWER_SYSTEM_PROMPT,
     REWRITE_SYSTEM_PROMPT,
     answer_system_prompt,
+    format_source,
     rewrite_user_prompt,
     strip_citation_markers,
 )
@@ -15,6 +17,7 @@ from papyruslm.domain.entities.message import MessageRole
 
 CHARS_PER_TOKEN = 3
 REWRITE_MAX_TOKENS = 128
+HISTORY_RESERVE_TOKENS = 512
 
 
 class OllamaChatAssistant:
@@ -51,6 +54,23 @@ class OllamaChatAssistant:
         )
         lines = [line.strip().removeprefix("Pergunta reescrita:").strip().strip("\"'“”") for line in response.text.splitlines()]
         return next((line for line in lines if line), "")
+
+    def select_sources(self, question: str, sources: list[Source]) -> list[Source]:
+        budget = (
+            self._context_tokens
+            - self._answer_tokens
+            - HISTORY_RESERVE_TOKENS
+            - self._estimate_tokens(ANSWER_SYSTEM_PROMPT)
+            - self._estimate_tokens(question)
+        )
+        selected: list[Source] = []
+        for source in sources:
+            cost = self._estimate_tokens(format_source(source))
+            if cost > budget:
+                break
+            budget -= cost
+            selected.append(source)
+        return selected
 
     async def stream_answer(self, history: list[Message], question: str, sources: list[Source]) -> AsyncIterator[str]:
         system = SystemMessage(answer_system_prompt(sources))
