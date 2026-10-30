@@ -19,3 +19,5 @@ wheels/
 data/
 
 node_modules
+
+.vscode
