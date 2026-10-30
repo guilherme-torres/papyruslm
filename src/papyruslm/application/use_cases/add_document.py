@@ -9,7 +9,7 @@ from papyruslm.domain.entities import Document
 from papyruslm.domain.repositories import DocumentRepository, NotebookRepository
 
 UNKNOWN_MIME_TYPE = "application/octet-stream"
-HEADER_SIZE = 2048
+HEADER_SIZE = 8192
 
 
 class AddDocumentUseCase:

@@ -8,6 +8,7 @@ from papyruslm.domain.exceptions import (
     FieldTooLong,
     FileTooLarge,
     InvalidStatusTransition,
+    NegativeValue,
     UnsupportedMimeType,
 )
 
@@ -61,6 +62,9 @@ class Document:
     mime_type: str
     status: DocumentStatus = DocumentStatus.PENDING
     embedding_model: str | None = None
+    attempts: int = 0
+    lease_version: int = 0
+    heartbeat_at: datetime | None = None
     id: UUID = field(default_factory=uuid4)
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -75,6 +79,10 @@ class Document:
             raise EmptyField("size_bytes")
         if self.size_bytes > MAX_SIZE_BYTES[self.document_type]:
             raise FileTooLarge(self.size_bytes, MAX_SIZE_BYTES[self.document_type])
+        if self.attempts < 0:
+            raise NegativeValue("attempts", self.attempts)
+        if self.lease_version < 0:
+            raise NegativeValue("lease_version", self.lease_version)
 
     @property
     def document_type(self) -> DocumentType:

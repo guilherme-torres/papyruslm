@@ -115,6 +115,12 @@ class DocumentOutput:
 
 
 @dataclass(frozen=True)
+class RecoverStaleDocumentsOutput:
+    requeued: int
+    failed: int
+
+
+@dataclass(frozen=True)
 class AskQuestionInput:
     notebook_id: UUID
     question: str
@@ -142,6 +148,14 @@ class MessageOutput:
             model=message.model,
             created_at=message.created_at,
         )
+
+
+@dataclass(frozen=True)
+class ListMessagesOutput:
+    total: int
+    limit: int
+    offset: int
+    items: list[MessageOutput]
 
 
 @dataclass(frozen=True)

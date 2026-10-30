@@ -1,0 +1,69 @@
+x-app: &app
+  build: .
+  image: papyruslm:latest
+  restart: unless-stopped
+  environment:
+    OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+    CHAT_MODEL: ${CHAT_MODEL:-phi4-mini}
+    EMBEDDING_MODEL: ${EMBEDDING_MODEL:-qwen3-embedding:0.6b}
+  volumes:
+    - papyruslm-data:/app/data
+
+services:
+  ollama:
+    image: ollama/ollama
+    restart: unless-stopped
+    volumes:
+      - ollama-models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  ollama-pull:
+    image: ollama/ollama
+    restart: "no"
+    environment:
+      OLLAMA_HOST: ollama:11434
+    entrypoint: ["sh", "-c"]
+    command:
+      - ollama pull ${CHAT_MODEL:-phi4-mini} && ollama pull ${EMBEDDING_MODEL:-qwen3-embedding:0.6b}
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  api:
+    <<: *app
+    command:
+      - sh
+      - -c
+      - alembic upgrade head && exec uvicorn papyruslm.main:app --host 0.0.0.0 --port 8000 --log-level info --proxy-headers --forwarded-allow-ips '*'
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      ollama-pull:
+        condition: service_completed_successfully
+
+  worker:
+    <<: *app
+    command: papyruslm-worker
+    depends_on:
+      ollama-pull:
+        condition: service_completed_successfully
+      api:
+        condition: service_healthy
+    healthcheck:
+      disable: true
+    stop_grace_period: ${WORKER_STOP_GRACE_PERIOD:-2m}
+    volumes:
+      - papyruslm-data:/app/data
+      - huggingface-cache:/app/.cache/huggingface
+    deploy:
+      replicas: ${WORKER_REPLICAS:-1}
+
+volumes:
+  papyruslm-data:
+  huggingface-cache:
+  ollama-models:

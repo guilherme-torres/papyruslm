@@ -1,6 +1,7 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
+import sqlite_vec
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -22,6 +23,7 @@ class SQLiteDatabaseManager:
             return
         self._engine = create_async_engine(self._db_url, echo=self._echo)
         self._register_pragmas(self._engine)
+        self._register_extensions(self._engine)
         self._sessionmaker = async_sessionmaker(
             bind=self._engine,
             expire_on_commit=False,
@@ -63,3 +65,14 @@ class SQLiteDatabaseManager:
                 cursor.execute("PRAGMA busy_timeout=5000")
             finally:
                 cursor.close()
+
+    @staticmethod
+    def _register_extensions(engine: AsyncEngine) -> None:
+        @event.listens_for(engine.sync_engine, "connect")
+        def _load_extensions(dbapi_conn, _record):
+            async def _load(connection):
+                await connection.enable_load_extension(True)
+                await connection.load_extension(sqlite_vec.loadable_path())
+                await connection.enable_load_extension(False)
+
+            dbapi_conn.run_async(_load)

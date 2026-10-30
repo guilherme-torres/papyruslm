@@ -81,3 +81,55 @@ class FlashcardResponsePaginated(BaseModel):
     limit: int
     offset: int
     items: list[FlashcardResponse]
+
+
+class DocumentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    notebook_id: UUID
+    filename: str
+    mime_type: str
+    size_bytes: int
+    status: str
+    created_at: datetime
+
+
+class CitationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    index: int
+    document_id: UUID
+    document_name: str
+    start: int
+    end: int
+    excerpt: str
+
+
+class MessageResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    notebook_id: UUID
+    role: str
+    content: str
+    citations: list[CitationResponse]
+    model: str | None
+    created_at: datetime
+
+
+class MessageFilterParams(BaseModel):
+    limit: int = Field(50, gt=0, le=100)
+    offset: int = Field(0, ge=0)
+
+
+class MessageResponsePaginated(BaseModel):
+    total: int
+    limit: int
+    offset: int
+    items: list[MessageResponse]
+
+
+class AskQuestionRequest(BaseModel):
+    question: str
+    document_ids: list[UUID] | None = None

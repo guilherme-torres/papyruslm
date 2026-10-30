@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
-from papyruslm.application.exceptions import FlashcardNotFound, NotebookNotFound
+from papyruslm.application.exceptions import DocumentNotFound, FileStorageError, FlashcardNotFound, NotebookNotFound
 from papyruslm.domain.exceptions import DomainValidationError, ReviewNotDue
 
 logger = logging.getLogger(__name__)
@@ -23,6 +23,14 @@ async def domain_validation_handler(_request: Request, exc: Exception) -> JSONRe
     )
 
 
+async def file_storage_error_handler(_request: Request, exc: Exception) -> JSONResponse:
+    logger.error("File storage failure: %s", exc, exc_info=exc)
+    return JSONResponse(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={"detail": "Could not store the file, try again later"},
+    )
+
+
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     logger.exception("Unhandled error on %s %s", request.method, request.url.path, exc_info=exc)
     return JSONResponse(
@@ -34,6 +42,8 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(NotebookNotFound, not_found_handler)
     app.add_exception_handler(FlashcardNotFound, not_found_handler)
+    app.add_exception_handler(DocumentNotFound, not_found_handler)
+    app.add_exception_handler(FileStorageError, file_storage_error_handler)
     app.add_exception_handler(ReviewNotDue, review_not_due_handler)
     app.add_exception_handler(DomainValidationError, domain_validation_handler)
     app.add_exception_handler(Exception, unhandled_exception_handler)

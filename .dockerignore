@@ -1,0 +1,14 @@
+.venv
+.git
+data/
+**/__pycache__
+*.py[oc]
+*.db
+*.db-shm
+*.db-wal
+*.wav
+node_modules
+frontend
+.env
+Dockerfile
+docker-compose.yml

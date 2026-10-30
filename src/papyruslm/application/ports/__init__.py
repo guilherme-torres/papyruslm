@@ -4,6 +4,7 @@ from papyruslm.application.ports.file_storage import FileStorage
 from papyruslm.application.ports.file_type_detector import FileTypeDetector
 from papyruslm.application.ports.text_extractor import TextExtractor
 from papyruslm.application.ports.text_splitter import TextSplitter
+from papyruslm.application.ports.unit_of_work import UnitOfWork
 from papyruslm.application.ports.vector_index import VectorIndex, VectorMatch
 
 
@@ -15,6 +16,7 @@ __all__ = [
     "Source",
     "TextExtractor",
     "TextSplitter",
+    "UnitOfWork",
     "VectorIndex",
     "VectorMatch",
 ]

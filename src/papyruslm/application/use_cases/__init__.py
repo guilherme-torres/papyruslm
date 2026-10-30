@@ -7,14 +7,25 @@ from papyruslm.application.use_cases.delete_notebook import DeleteNotebookUseCas
 from papyruslm.application.use_cases.find_next_due import FindNextDueUseCase
 from papyruslm.application.use_cases.list_flashcards import ListFlashcardsUseCase
 from papyruslm.application.use_cases.list_notebooks import ListNotebooksUseCase
-from papyruslm.application.use_cases.process_next_document import ProcessNextDocumentUseCase
+from papyruslm.application.use_cases.claim_next_document import ClaimNextDocumentUseCase
+from papyruslm.application.use_cases.process_document import ProcessDocumentUseCase
+from papyruslm.application.use_cases.recover_stale_documents import RecoverStaleDocumentsUseCase
+from papyruslm.application.use_cases.renew_lease import RenewLeaseUseCase
 from papyruslm.application.use_cases.review_flashcard import ReviewFlashcardUseCase
 from papyruslm.application.use_cases.update_flashcard import UpdateFlashcardUseCase
 from papyruslm.application.use_cases.update_notebook import UpdateNotebookUseCase
 from papyruslm.application.use_cases.list_tags import ListTagsUseCase
 
+from papyruslm.application.use_cases.clear_messages import ClearMessagesUseCase
+from papyruslm.application.use_cases.delete_document import DeleteDocumentUseCase
+from papyruslm.application.use_cases.list_documents import ListDocumentsUseCase
+from papyruslm.application.use_cases.list_messages import ListMessagesUseCase
 
 __all__ = [
+    "ListMessagesUseCase",
+    "ListDocumentsUseCase",
+    "DeleteDocumentUseCase",
+    "ClearMessagesUseCase",
     "AddDocumentUseCase",
     "AskQuestionUseCase",
     "CreateFlashcardUseCase",
@@ -24,7 +35,10 @@ __all__ = [
     "FindNextDueUseCase",
     "ListFlashcardsUseCase",
     "ListNotebooksUseCase",
-    "ProcessNextDocumentUseCase",
+    "ClaimNextDocumentUseCase",
+    "ProcessDocumentUseCase",
+    "RecoverStaleDocumentsUseCase",
+    "RenewLeaseUseCase",
     "ReviewFlashcardUseCase",
     "UpdateFlashcardUseCase",
     "UpdateNotebookUseCase",
