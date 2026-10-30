@@ -121,6 +121,15 @@ class RecoverStaleDocumentsOutput:
 
 
 @dataclass(frozen=True)
+class SyncVectorIndexOutput:
+    changed: bool
+    model: str
+    dimensions: int
+    reindex: int = 0
+    reprocess: int = 0
+
+
+@dataclass(frozen=True)
 class AskQuestionInput:
     notebook_id: UUID
     question: str
@@ -156,6 +165,15 @@ class ListMessagesOutput:
     limit: int
     offset: int
     items: list[MessageOutput]
+
+
+@dataclass(frozen=True)
+class CitationSourceOutput:
+    document_id: UUID
+    document_name: str
+    before: str
+    highlight: str
+    after: str
 
 
 @dataclass(frozen=True)

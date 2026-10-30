@@ -20,8 +20,14 @@ from papyruslm.application.use_cases.clear_messages import ClearMessagesUseCase
 from papyruslm.application.use_cases.delete_document import DeleteDocumentUseCase
 from papyruslm.application.use_cases.list_documents import ListDocumentsUseCase
 from papyruslm.application.use_cases.list_messages import ListMessagesUseCase
+from papyruslm.application.use_cases.get_citation_source import GetCitationSourceUseCase
+from papyruslm.application.use_cases.reprocess_document import ReprocessDocumentUseCase
+from papyruslm.application.use_cases.sync_vector_index import SyncVectorIndexUseCase
 
 __all__ = [
+    "SyncVectorIndexUseCase",
+    "ReprocessDocumentUseCase",
+    "GetCitationSourceUseCase",
     "ListMessagesUseCase",
     "ListDocumentsUseCase",
     "DeleteDocumentUseCase",

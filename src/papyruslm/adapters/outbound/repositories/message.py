@@ -18,6 +18,10 @@ class SQLAlchemyMessageRepository:
         await self._session.refresh(message_db)
         return message_db.to_entity()
 
+    async def find_by_id(self, id: UUID) -> Message | None:
+        message_db = await self._session.get(SQLAlchemyMessage, id)
+        return message_db.to_entity() if message_db else None
+
     async def list_messages_by_notebook_id(
         self,
         notebook_id: UUID,

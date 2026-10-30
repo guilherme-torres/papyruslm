@@ -28,12 +28,12 @@ MIME_TYPE_TO_DOCUMENT_TYPE: dict[str, DocumentType] = {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": DocumentType.DOCX,
     "text/plain": DocumentType.TEXT,
     "text/markdown": DocumentType.MARKDOWN,
-    "audio/mpeg": DocumentType.AUDIO,
-    "audio/wav": DocumentType.AUDIO,
-    "audio/mp4": DocumentType.AUDIO,
-    "audio/ogg": DocumentType.AUDIO,
-    "audio/webm": DocumentType.AUDIO,
-    "audio/flac": DocumentType.AUDIO,
+    # "audio/mpeg": DocumentType.AUDIO,
+    # "audio/wav": DocumentType.AUDIO,
+    # "audio/mp4": DocumentType.AUDIO,
+    # "audio/ogg": DocumentType.AUDIO,
+    # "audio/webm": DocumentType.AUDIO,
+    # "audio/flac": DocumentType.AUDIO,
 }
 
 
@@ -44,6 +44,11 @@ MAX_SIZE_BYTES: dict[DocumentType, int] = {
     DocumentType.MARKDOWN: 10 * 1024 * 1024,
     DocumentType.AUDIO: 200 * 1024 * 1024,
 }
+
+
+class DocumentJob(StrEnum):
+    PROCESS = "process"
+    REINDEX = "reindex"
 
 
 class DocumentStatus(StrEnum):
@@ -62,6 +67,7 @@ class Document:
     mime_type: str
     status: DocumentStatus = DocumentStatus.PENDING
     embedding_model: str | None = None
+    job: DocumentJob = DocumentJob.PROCESS
     attempts: int = 0
     lease_version: int = 0
     heartbeat_at: datetime | None = None
@@ -106,6 +112,15 @@ class Document:
             from_status={DocumentStatus.PROCESSING},
             to_status=DocumentStatus.FAILED,
         )
+
+    def requeue(self) -> None:
+        self._status_transition(
+            from_status={DocumentStatus.FAILED, DocumentStatus.READY},
+            to_status=DocumentStatus.PENDING,
+        )
+        self.job = DocumentJob.PROCESS
+        self.attempts = 0
+        self.heartbeat_at = None
 
     def _status_transition(self, from_status: set[DocumentStatus], to_status: DocumentStatus) -> None:
         if self.status not in from_status:

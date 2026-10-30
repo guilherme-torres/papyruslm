@@ -5,7 +5,12 @@ from fastapi import APIRouter, UploadFile, status
 
 from papyruslm.adapters.inbound.http.routers.v1.schemas import DocumentResponse
 from papyruslm.application.dto import AddDocumentInput
-from papyruslm.application.use_cases import AddDocumentUseCase, DeleteDocumentUseCase, ListDocumentsUseCase
+from papyruslm.application.use_cases import (
+    AddDocumentUseCase,
+    DeleteDocumentUseCase,
+    ListDocumentsUseCase,
+    ReprocessDocumentUseCase,
+)
 
 router = APIRouter(tags=["documents"], route_class=DishkaRoute)
 
@@ -37,3 +42,12 @@ async def delete_document(
     use_case: FromDishka[DeleteDocumentUseCase],
 ) -> None:
     await use_case.execute(id)
+
+
+@router.post("/documents/{id}/reprocess", status_code=status.HTTP_202_ACCEPTED)
+async def reprocess_document(
+    id: UUID,
+    use_case: FromDishka[ReprocessDocumentUseCase],
+) -> DocumentResponse:
+    document = await use_case.execute(id)
+    return DocumentResponse.model_validate(document)

@@ -10,12 +10,18 @@ from fastapi.sse import EventSourceResponse
 
 from papyruslm.adapters.inbound.http.routers.v1.schemas import (
     AskQuestionRequest,
+    CitationSourceResponse,
     MessageFilterParams,
     MessageResponse,
     MessageResponsePaginated,
 )
 from papyruslm.application.dto import AnswerDelta, AskQuestionInput, ChatEvent
-from papyruslm.application.use_cases import AskQuestionUseCase, ClearMessagesUseCase, ListMessagesUseCase
+from papyruslm.application.use_cases import (
+    AskQuestionUseCase,
+    ClearMessagesUseCase,
+    GetCitationSourceUseCase,
+    ListMessagesUseCase,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +64,17 @@ async def clear_messages(
     use_case: FromDishka[ClearMessagesUseCase],
 ) -> None:
     await use_case.execute(id)
+
+
+@router.get("/{id}/messages/{message_id}/citations/{index}/source")
+async def get_citation_source(
+    id: UUID,
+    message_id: UUID,
+    index: int,
+    use_case: FromDishka[GetCitationSourceUseCase],
+) -> CitationSourceResponse:
+    source = await use_case.execute(id, message_id, index)
+    return CitationSourceResponse.model_validate(source)
 
 
 async def _stream(first_event: ChatEvent, events: AsyncIterator[ChatEvent]) -> AsyncIterator[str]:

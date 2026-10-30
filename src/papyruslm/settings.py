@@ -13,7 +13,6 @@ class Settings(BaseSettings):
     chat_model: str = "phi4-mini"
     chat_context_tokens: int = 8192
     embedding_model: str = "qwen3-embedding:0.6b"
-    embedding_dimensions: int = 1024
     chunk_size: int = 2000
     chunk_overlap: int = 300
     ocr_language: str = "por+eng"

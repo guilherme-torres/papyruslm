@@ -5,7 +5,7 @@ from papyruslm.application.ports.file_type_detector import FileTypeDetector
 from papyruslm.application.ports.text_extractor import TextExtractor
 from papyruslm.application.ports.text_splitter import TextSplitter
 from papyruslm.application.ports.unit_of_work import UnitOfWork
-from papyruslm.application.ports.vector_index import VectorIndex, VectorMatch
+from papyruslm.application.ports.vector_index import IndexSignature, VectorIndex, VectorMatch
 
 
 __all__ = [
@@ -13,6 +13,7 @@ __all__ = [
     "Embedder",
     "FileStorage",
     "FileTypeDetector",
+    "IndexSignature",
     "Source",
     "TextExtractor",
     "TextSplitter",

@@ -20,3 +20,11 @@ class SQLAlchemyChunkRepository:
             return []
         result = await self._session.scalars(select(SQLAlchemyChunk).where(SQLAlchemyChunk.id.in_(ids)))
         return [chunk_db.to_entity() for chunk_db in result]
+
+    async def list_by_document_id(self, document_id: UUID) -> list[Chunk]:
+        result = await self._session.scalars(
+            select(SQLAlchemyChunk)
+            .where(SQLAlchemyChunk.document_id == document_id)
+            .order_by(SQLAlchemyChunk.position)
+        )
+        return [chunk_db.to_entity() for chunk_db in result]

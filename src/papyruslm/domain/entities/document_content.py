@@ -3,6 +3,7 @@ from hashlib import sha256
 from uuid import UUID
 
 from papyruslm.domain.exceptions import EmptyField, InvalidTextRange
+from papyruslm.domain.value_objects import Citation
 
 
 @dataclass(frozen=True)
@@ -23,3 +24,13 @@ class DocumentContent:
         if not 0 <= start < end <= len(self.text):
             raise InvalidTextRange(start, end)
         return self.text[start:end]
+
+    def locate(self, citation: Citation) -> tuple[int, int] | None:
+        if citation.document_id != self.document_id:
+            return None
+        if citation.content_checksum == self.checksum and self.text[citation.start : citation.end] == citation.excerpt:
+            return citation.start, citation.end
+        position = self.text.find(citation.excerpt)
+        if position < 0:
+            return None
+        return position, position + len(citation.excerpt)

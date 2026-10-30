@@ -133,3 +133,13 @@ class MessageResponsePaginated(BaseModel):
 class AskQuestionRequest(BaseModel):
     question: str
     document_ids: list[UUID] | None = None
+
+
+class CitationSourceResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    document_id: UUID
+    document_name: str
+    before: str
+    highlight: str
+    after: str

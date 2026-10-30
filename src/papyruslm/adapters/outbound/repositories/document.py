@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from papyruslm.adapters.outbound.database.models import SQLAlchemyDocument
 from papyruslm.domain.entities import Document
-from papyruslm.domain.entities.document import DocumentStatus
+from papyruslm.domain.entities.document import DocumentJob, DocumentStatus
 
 
 class SQLAlchemyDocumentRepository:
@@ -44,6 +44,9 @@ class SQLAlchemyDocumentRepository:
             return None
         document_db.status = document.status
         document_db.embedding_model = document.embedding_model
+        document_db.job = document.job
+        document_db.attempts = document.attempts
+        document_db.heartbeat_at = document.heartbeat_at
         await self._session.commit()
         await self._session.refresh(document_db)
         return document_db.to_entity()
@@ -117,3 +120,17 @@ class SQLAlchemyDocumentRepository:
             .values(status=document.status, embedding_model=document.embedding_model)
         )
         return result.rowcount > 0
+
+    async def requeue_for_new_index(self) -> tuple[int, int]:
+        reset = {"status": DocumentStatus.PENDING, "attempts": 0, "heartbeat_at": None}
+        reindex = await self._session.execute(
+            update(SQLAlchemyDocument)
+            .where(SQLAlchemyDocument.status == DocumentStatus.READY)
+            .values(job=DocumentJob.REINDEX, **reset)
+        )
+        reprocess = await self._session.execute(
+            update(SQLAlchemyDocument)
+            .where(SQLAlchemyDocument.status == DocumentStatus.FAILED)
+            .values(job=DocumentJob.PROCESS, **reset)
+        )
+        return reindex.rowcount, reprocess.rowcount

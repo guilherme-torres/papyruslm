@@ -6,6 +6,7 @@ from papyruslm.domain.entities import Message
 
 class MessageRepository(Protocol):
     async def create_message(self, message: Message) -> Message: ...
+    async def find_by_id(self, id: UUID) -> Message | None: ...
     async def list_messages_by_notebook_id(
         self,
         notebook_id: UUID,

@@ -4,24 +4,54 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlite_vec import serialize_float32
 
-from papyruslm.application.ports import VectorMatch
+from papyruslm.application.ports import IndexSignature, VectorMatch
 from papyruslm.domain.entities import Chunk
 
 TABLE_NAME = "chunk_vectors"
+META_TABLE_NAME = "chunk_vectors_meta"
+
+
+class VectorIndexNotInitialized(RuntimeError):
+    def __init__(self):
+        super().__init__(f"The vector index table {TABLE_NAME} does not exist yet")
 
 
 class SqliteVecIndex:
-    def __init__(self, session: AsyncSession, dimensions: int):
+    def __init__(self, session: AsyncSession):
         self._session = session
-        self._dimensions = dimensions
-        self._table_ready = False
+
+    async def get_signature(self) -> IndexSignature | None:
+        await self._ensure_meta_table()
+        row = (await self._session.execute(text(f"SELECT model, dimensions FROM {META_TABLE_NAME}"))).first()
+        if row is None or not await self._table_exists():
+            return None
+        return IndexSignature(model=row.model, dimensions=row.dimensions)
+
+    async def reset(self, signature: IndexSignature) -> None:
+        await self._ensure_meta_table()
+        await self._session.execute(text(f"DROP TABLE IF EXISTS {TABLE_NAME}"))
+        await self._session.execute(
+            text(
+                f"CREATE VIRTUAL TABLE {TABLE_NAME} USING vec0("
+                "chunk_id TEXT PRIMARY KEY, "
+                "notebook_id TEXT PARTITION KEY, "
+                "document_id TEXT, "
+                f"embedding FLOAT[{int(signature.dimensions)}] distance_metric=cosine)"
+            )
+        )
+        await self._session.execute(text(f"DELETE FROM {META_TABLE_NAME}"))
+        await self._session.execute(
+            text(f"INSERT INTO {META_TABLE_NAME} (model, dimensions) VALUES (:model, :dimensions)"),
+            {"model": signature.model, "dimensions": signature.dimensions},
+        )
 
     async def add(self, notebook_id: UUID, chunks: list[Chunk], vectors: list[list[float]]) -> None:
         if len(chunks) != len(vectors):
             raise ValueError(f"Got {len(chunks)} chunks and {len(vectors)} vectors")
         if not chunks:
             return
-        await self._ensure_table()
+        if not await self._table_exists():
+            raise VectorIndexNotInitialized()
         await self._session.execute(
             text(
                 f"INSERT INTO {TABLE_NAME} (chunk_id, notebook_id, document_id, embedding) "
@@ -39,7 +69,8 @@ class SqliteVecIndex:
         )
 
     async def delete_by_document_id(self, document_id: UUID) -> None:
-        await self._ensure_table()
+        if not await self._table_exists():
+            return
         await self._session.execute(
             text(f"DELETE FROM {TABLE_NAME} WHERE document_id = :document_id"),
             {"document_id": document_id.hex},
@@ -52,7 +83,8 @@ class SqliteVecIndex:
         limit: int,
         document_ids: list[UUID] | None = None,
     ) -> list[VectorMatch]:
-        await self._ensure_table()
+        if not await self._table_exists():
+            return []
         if document_ids is None:
             matches = await self._knn(notebook_id, vector, limit)
         else:
@@ -86,16 +118,14 @@ class SqliteVecIndex:
         )
         return [VectorMatch(chunk_id=UUID(chunk_id), score=1 - distance) for chunk_id, distance in result]
 
-    async def _ensure_table(self) -> None:
-        if self._table_ready:
-            return
-        await self._session.execute(
-            text(
-                f"CREATE VIRTUAL TABLE IF NOT EXISTS {TABLE_NAME} USING vec0("
-                "chunk_id TEXT PRIMARY KEY, "
-                "notebook_id TEXT PARTITION KEY, "
-                "document_id TEXT, "
-                f"embedding FLOAT[{self._dimensions}] distance_metric=cosine)"
-            )
+    async def _table_exists(self) -> bool:
+        result = await self._session.execute(
+            text("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = :name"),
+            {"name": TABLE_NAME},
         )
-        self._table_ready = True
+        return result.first() is not None
+
+    async def _ensure_meta_table(self) -> None:
+        await self._session.execute(
+            text(f"CREATE TABLE IF NOT EXISTS {META_TABLE_NAME} (model TEXT NOT NULL, dimensions INTEGER NOT NULL)")
+        )

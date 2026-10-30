@@ -11,7 +11,15 @@ class VectorMatch:
     score: float
 
 
+@dataclass(frozen=True)
+class IndexSignature:
+    model: str
+    dimensions: int
+
+
 class VectorIndex(Protocol):
+    async def get_signature(self) -> IndexSignature | None: ...
+    async def reset(self, signature: IndexSignature) -> None: ...
     async def add(self, notebook_id: UUID, chunks: list[Chunk], vectors: list[list[float]]) -> None: ...
     async def delete_by_document_id(self, document_id: UUID) -> None: ...
     async def search(

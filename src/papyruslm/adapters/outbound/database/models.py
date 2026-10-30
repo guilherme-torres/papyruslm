@@ -8,7 +8,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from papyruslm.adapters.outbound.database.types import UTCDateTime
 from papyruslm.domain.entities import Chunk, Document, DocumentContent, Flashcard, Message, Notebook, Tag
-from papyruslm.domain.entities.document import DocumentStatus
+from papyruslm.domain.entities.document import DocumentJob, DocumentStatus
 from papyruslm.domain.entities.message import MessageRole
 from papyruslm.domain.value_objects import Citation
 
@@ -106,6 +106,7 @@ class SQLAlchemyDocument(Base):
     mime_type: Mapped[str] = mapped_column(String(255))
     status: Mapped[str] = mapped_column(String(20))
     embedding_model: Mapped[str | None] = mapped_column(String(255))
+    job: Mapped[str] = mapped_column(String(20), default=DocumentJob.PROCESS, server_default=DocumentJob.PROCESS)
     attempts: Mapped[int] = mapped_column(default=0)
     lease_version: Mapped[int] = mapped_column(default=0)
     heartbeat_at: Mapped[datetime | None]
@@ -123,6 +124,7 @@ class SQLAlchemyDocument(Base):
             mime_type=document.mime_type,
             status=document.status,
             embedding_model=document.embedding_model,
+            job=document.job,
             attempts=document.attempts,
             lease_version=document.lease_version,
             heartbeat_at=document.heartbeat_at,
@@ -139,6 +141,7 @@ class SQLAlchemyDocument(Base):
             mime_type=self.mime_type,
             status=DocumentStatus(self.status),
             embedding_model=self.embedding_model,
+            job=DocumentJob(self.job),
             attempts=self.attempts,
             lease_version=self.lease_version,
             heartbeat_at=self.heartbeat_at,

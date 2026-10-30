@@ -11,7 +11,7 @@ from papyruslm.adapters.outbound.embedding import OllamaEmbedder
 from papyruslm.adapters.outbound.extraction import (
     DocumentTypeTextExtractor,
     DocxExtractor,
-    FasterWhisperTranscriber,
+    # FasterWhisperTranscriber,
     LiteParsePdfExtractor,
     PlainTextExtractor,
 )
@@ -49,6 +49,7 @@ from papyruslm.application.use_cases import (
     DeleteFlashcardUseCase,
     DeleteNotebookUseCase,
     FindNextDueUseCase,
+    GetCitationSourceUseCase,
     ListDocumentsUseCase,
     ListFlashcardsUseCase,
     ListMessagesUseCase,
@@ -57,6 +58,8 @@ from papyruslm.application.use_cases import (
     ProcessDocumentUseCase,
     RecoverStaleDocumentsUseCase,
     RenewLeaseUseCase,
+    ReprocessDocumentUseCase,
+    SyncVectorIndexUseCase,
     ReviewFlashcardUseCase,
     UpdateFlashcardUseCase,
     UpdateNotebookUseCase,
@@ -116,8 +119,8 @@ class RagProvider(Provider):
         return OllamaEmbedder(settings.embedding_model, settings.ollama_base_url)
 
     @provide(scope=Scope.REQUEST)
-    def vector_index(self, session: AsyncSession, settings: Settings) -> VectorIndex:
-        return SqliteVecIndex(session, settings.embedding_dimensions)
+    def vector_index(self, session: AsyncSession) -> VectorIndex:
+        return SqliteVecIndex(session)
 
 
 class ApiProvider(Provider):
@@ -145,6 +148,9 @@ class ApiProvider(Provider):
         AskQuestionUseCase,
         ListMessagesUseCase,
         ClearMessagesUseCase,
+        GetCitationSourceUseCase,
+        ReprocessDocumentUseCase,
+        SyncVectorIndexUseCase,
         scope=Scope.REQUEST,
     )
 
@@ -159,12 +165,12 @@ class WorkerProvider(Provider):
                 DocumentType.DOCX: DocxExtractor(),
                 DocumentType.TEXT: plain_text,
                 DocumentType.MARKDOWN: plain_text,
-                DocumentType.AUDIO: FasterWhisperTranscriber(
-                    settings.whisper_model,
-                    settings.whisper_device,
-                    settings.whisper_compute_type,
-                    settings.transcription_language,
-                ),
+                # DocumentType.AUDIO: FasterWhisperTranscriber(
+                #     settings.whisper_model,
+                #     settings.whisper_device,
+                #     settings.whisper_compute_type,
+                #     settings.transcription_language,
+                # ),
             }
         )
 
