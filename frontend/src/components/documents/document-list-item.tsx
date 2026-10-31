@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileTextIcon, RotateCwIcon, Trash2Icon, TriangleAlertIcon } from 'lucide-react'
+import { AudioLinesIcon, FileTextIcon, RotateCwIcon, Trash2Icon, TriangleAlertIcon } from 'lucide-react'
 import type { NotebookDocument } from '@/api/documents'
 import { DeleteDocumentDialog } from '@/components/documents/delete-document-dialog'
 import { Button } from '@/components/ui/button'
@@ -23,6 +23,7 @@ export function DocumentListItem({ notebookId, document, selected, onSelectedCha
     const isReady = document.status === 'ready'
     const isInProgress = document.status === 'pending' || document.status === 'processing'
     const isFailed = document.status === 'failed'
+    const isAudio = document.mime_type.startsWith('audio/')
 
     function reprocess() {
         reprocessDocument.mutate(document.id, {
@@ -45,6 +46,8 @@ export function DocumentListItem({ notebookId, document, selected, onSelectedCha
                 >
                     {isFailed ? (
                         <TriangleAlertIcon data-icon="inline-start" className="text-destructive" />
+                    ) : isAudio ? (
+                        <AudioLinesIcon data-icon="inline-start" />
                     ) : (
                         <FileTextIcon data-icon="inline-start" />
                     )}

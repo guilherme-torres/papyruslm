@@ -11,7 +11,7 @@ from papyruslm.adapters.outbound.embedding import OllamaEmbedder
 from papyruslm.adapters.outbound.extraction import (
     DocumentTypeTextExtractor,
     DocxExtractor,
-    # FasterWhisperTranscriber,
+    FasterWhisperTranscriber,
     LiteParsePdfExtractor,
     PlainTextExtractor,
 )
@@ -169,12 +169,12 @@ class WorkerProvider(Provider):
                 DocumentType.DOCX: DocxExtractor(),
                 DocumentType.TEXT: plain_text,
                 DocumentType.MARKDOWN: plain_text,
-                # DocumentType.AUDIO: FasterWhisperTranscriber(
-                #     settings.whisper_model,
-                #     settings.whisper_device,
-                #     settings.whisper_compute_type,
-                #     settings.transcription_language,
-                # ),
+                DocumentType.AUDIO: FasterWhisperTranscriber(
+                    settings.whisper_model,
+                    settings.whisper_device,
+                    settings.whisper_compute_type,
+                    settings.transcription_language,
+                ),
             }
         )
 

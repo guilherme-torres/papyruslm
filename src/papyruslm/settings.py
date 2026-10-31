@@ -11,13 +11,13 @@ class Settings(BaseSettings):
     db_echo: bool = False
     ollama_base_url: str = "http://localhost:11434"
     chat_model: str = "phi4-mini"
-    chat_context_tokens: int = 8192
+    chat_context_tokens: int = 4096
     embedding_model: str = "qwen3-embedding:0.6b"
     chunk_size: int = 1000
     chunk_overlap: int = 200
     ocr_language: str = "por+eng"
     tessdata_path: Path | None = None
-    whisper_model: str = "small"
+    whisper_model: str = "base"
     whisper_device: str = "cpu"
     whisper_compute_type: str = "int8"
     transcription_language: str | None = None

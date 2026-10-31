@@ -1,4 +1,5 @@
-import { ArrowRightIcon, FileTextIcon } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import { ArrowRightIcon } from 'lucide-react'
 import type { Citation } from '@/api/messages'
 import { Button } from '@/components/ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
@@ -28,15 +29,39 @@ export function CitationButton({ citation, onOpen }: CitationButtonProps) {
             </HoverCardTrigger>
             <HoverCardContent className="flex w-80 flex-col gap-2">
                 <div className="flex min-w-0 items-center gap-2 font-medium">
-                    <FileTextIcon className="size-4 shrink-0 text-muted-foreground" />
                     <span className="truncate">{citation.document_name}</span>
                 </div>
-                <p className="line-clamp-5 text-muted-foreground">{citation.excerpt}</p>
-                <Button variant="outline" size="sm" className="self-start" onClick={() => onOpen(citation)}>
+                <CitationExcerpt text={citation.excerpt} />
+                <Button
+                    variant="link"
+                    size="sm"
+                    className="h-auto self-end px-0 underline decoration-dotted hover:decoration-solid"
+                    onClick={() => onOpen(citation)}
+                >
                     Ir para a fonte
                     <ArrowRightIcon data-icon="inline-end" />
                 </Button>
             </HoverCardContent>
         </HoverCard>
+    )
+}
+
+function CitationExcerpt({ text }: { text: string }) {
+    const [hasMoreBelow, setHasMoreBelow] = useState(false)
+
+    const updateFade = useCallback((element: HTMLElement | null) => {
+        if (!element) return
+        setHasMoreBelow(element.scrollHeight - element.scrollTop - element.clientHeight > 1)
+    }, [])
+
+    return (
+        <p
+            ref={updateFade}
+            onScroll={(event) => updateFade(event.currentTarget)}
+            data-more-below={hasMoreBelow}
+            className="max-h-60 overflow-y-auto overscroll-contain pr-1 whitespace-pre-line text-muted-foreground data-[more-below=true]:mask-b-from-75%"
+        >
+            {text}
+        </p>
     )
 }

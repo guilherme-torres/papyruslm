@@ -28,12 +28,12 @@ MIME_TYPE_TO_DOCUMENT_TYPE: dict[str, DocumentType] = {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": DocumentType.DOCX,
     "text/plain": DocumentType.TEXT,
     "text/markdown": DocumentType.MARKDOWN,
-    # "audio/mpeg": DocumentType.AUDIO,
-    # "audio/wav": DocumentType.AUDIO,
-    # "audio/mp4": DocumentType.AUDIO,
-    # "audio/ogg": DocumentType.AUDIO,
-    # "audio/webm": DocumentType.AUDIO,
-    # "audio/flac": DocumentType.AUDIO,
+    "audio/mpeg": DocumentType.AUDIO,
+    "audio/wav": DocumentType.AUDIO,
+    "audio/mp4": DocumentType.AUDIO,
+    "audio/ogg": DocumentType.AUDIO,
+    "audio/webm": DocumentType.AUDIO,
+    "audio/flac": DocumentType.AUDIO,
 }
 
 

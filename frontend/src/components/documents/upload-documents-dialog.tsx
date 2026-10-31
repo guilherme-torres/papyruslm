@@ -15,7 +15,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { toast } from '@/components/ui/toast'
 import { useUploadDocument } from '@/queries/documents'
 
-const ACCEPTED_EXTENSIONS = '.pdf,.docx,.txt,.md,.markdown'
+const ACCEPTED_EXTENSIONS = '.pdf,.docx,.txt,.md,.markdown,.mp3,.wav,.m4a,.ogg,.oga,.opus,.webm,.flac'
 const UPLOAD_ERROR = 'Não foi possível enviar o arquivo.'
 
 type UploadStatus = 'uploading' | 'done' | 'error'
@@ -116,7 +116,7 @@ function UploadDocumentsForm({ notebookId, onUploaded }: UploadDocumentsFormProp
                     <UploadIcon className="size-5" />
                 </span>
                 <span className="font-medium">Arraste arquivos para cá ou clique para escolher</span>
-                <span className="text-muted-foreground">PDF e Word até 50 MB · Markdown e texto até 10 MB</span>
+                <span className="text-muted-foreground">PDF e Word até 50 MB · Markdown e texto até 10 MB · Áudio até 200 MB</span>
                 <input
                     id="document-files"
                     type="file"
