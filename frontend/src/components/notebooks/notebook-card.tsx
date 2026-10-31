@@ -40,7 +40,7 @@ export function NotebookCard({ notebook }: NotebookCardProps) {
                     <CardHeader>
                         <CardTitle className="min-w-0 truncate">
                             <Link
-                                to="/notebooks/$notebookId"
+                                to="/notebook/$notebookId"
                                 params={{ notebookId: notebook.id }}
                                 className="outline-none after:absolute after:inset-0"
                             >

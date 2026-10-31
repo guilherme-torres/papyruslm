@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     lease_heartbeat_seconds: float = 30.0
     lease_timeout_seconds: float = 120.0
     processing_max_attempts: int = 3
+    frontend_dir: Path | None = None
 
     @property
     def db_path(self) -> Path:

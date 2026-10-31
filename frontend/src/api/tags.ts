@@ -5,11 +5,15 @@ export interface Tag {
     name: string
 }
 
-interface ListTagsResponse {
-    items: Tag[]
+export interface TagUsage extends Tag {
+    notebooks_total: number
 }
 
-export async function listTags(signal?: AbortSignal): Promise<Tag[]> {
+interface ListTagsResponse {
+    items: TagUsage[]
+}
+
+export async function listTags(signal?: AbortSignal): Promise<TagUsage[]> {
     const response = await http.get<ListTagsResponse>('/tags', { signal })
     return response.items
 }

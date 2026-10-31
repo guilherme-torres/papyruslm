@@ -30,7 +30,7 @@ import { documentsQueryOptions } from '@/queries/documents'
 import { useAskQuestion } from '@/queries/messages'
 import { notebookQueryOptions } from '@/queries/notebooks'
 
-const route = getRouteApi('/notebooks/$notebookId')
+const route = getRouteApi('/notebook/$notebookId')
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 1024px)'
 
@@ -137,7 +137,7 @@ function NotebookHeader({ notebookId, notebookQuery }: NotebookHeaderProps) {
                 variant="outline"
                 size="sm"
                 nativeButton={false}
-                render={<Link to="/notebooks/$notebookId/flashcards" params={{ notebookId }} />}
+                render={<Link to="/notebook/$notebookId/flashcards" params={{ notebookId }} />}
             >
                 <GalleryVerticalEndIcon data-icon="inline-start" />
                 Gerenciar flashcards

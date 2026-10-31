@@ -77,8 +77,13 @@ export function Home() {
                         onValueChange={(selected: string[]) => changeTags(selected)}
                     >
                         {availableTags.map((tag) => (
-                            <ToggleGroupItem key={tag.id} value={tag.name}>
+                            <ToggleGroupItem
+                                key={tag.id}
+                                value={tag.name}
+                                aria-label={`${tag.name}, ${notebooksLabel(tag.notebooks_total)}`}
+                            >
                                 {tag.name}
+                                <span className="text-muted-foreground tabular-nums">{tag.notebooks_total}</span>
                             </ToggleGroupItem>
                         ))}
                     </ToggleGroup>

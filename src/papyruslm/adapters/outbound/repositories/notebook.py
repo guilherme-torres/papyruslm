@@ -1,10 +1,10 @@
 from uuid import UUID
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, exists, func, select
 from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from papyruslm.adapters.outbound.database.models import SQLAlchemyNotebook, SQLAlchemyTag
+from papyruslm.adapters.outbound.database.models import SQLAlchemyNotebook, SQLAlchemyTag, tags_notebooks
 from papyruslm.domain.entities import Notebook, Tag
 
 
@@ -50,6 +50,8 @@ class SQLAlchemyNotebookRepository:
             return None
         notebook_db.name = notebook.name
         notebook_db.tags = await self._get_or_create_tags(notebook.tags)
+        await self._session.flush()
+        await self._delete_orphan_tags()
         await self._session.commit()
         await self._session.refresh(notebook_db)
         return notebook_db.to_entity()
@@ -58,6 +60,7 @@ class SQLAlchemyNotebookRepository:
         result = await self._session.execute(
             delete(SQLAlchemyNotebook).where(SQLAlchemyNotebook.id == id)
         )
+        await self._delete_orphan_tags()
         await self._session.commit()
         return result.rowcount > 0
 
@@ -67,6 +70,11 @@ class SQLAlchemyNotebookRepository:
 
     async def _get_model(self, id: UUID) -> SQLAlchemyNotebook | None:
         return await self._session.get(SQLAlchemyNotebook, id)
+
+    async def _delete_orphan_tags(self) -> None:
+        await self._session.execute(
+            delete(SQLAlchemyTag).where(~exists().where(tags_notebooks.c.tag_id == SQLAlchemyTag.id))
+        )
 
     async def _get_or_create_tags(self, tags: list[Tag]) -> list[SQLAlchemyTag]:
         tags_by_name: dict[str, Tag] = {}

@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { flashcardsQueryOptions } from '@/queries/flashcards'
 import { notebookQueryOptions } from '@/queries/notebooks'
 
-const route = getRouteApi('/notebooks/$notebookId_/flashcards')
+const route = getRouteApi('/notebook/$notebookId_/flashcards')
 
 const PAGE_SIZE = 20
 
@@ -50,7 +50,7 @@ export function FlashcardsPage() {
 
     const hrefForPage = (target: number) =>
         router.buildLocation({
-            to: '/notebooks/$notebookId/flashcards',
+            to: '/notebook/$notebookId/flashcards',
             params: { notebookId },
             search: { page: target > 1 ? target : undefined },
         }).href
@@ -66,7 +66,7 @@ export function FlashcardsPage() {
                         size="icon-sm"
                         aria-label="Voltar para o caderno"
                         nativeButton={false}
-                        render={<Link to="/notebooks/$notebookId" params={{ notebookId }} />}
+                        render={<Link to="/notebook/$notebookId" params={{ notebookId }} />}
                     >
                         <ArrowLeftIcon />
                     </Button>
@@ -114,7 +114,7 @@ export function FlashcardsPage() {
                         </EmptyMedia>
                         <EmptyTitle>Nenhum flashcard ainda</EmptyTitle>
                         <EmptyDescription>
-                            Crie flashcards para revisar o conteúdo deste caderno com repetição espaçada.
+                            Crie flashcards para revisar o conteúdo deste caderno.
                         </EmptyDescription>
                     </EmptyHeader>
                     <EmptyContent>

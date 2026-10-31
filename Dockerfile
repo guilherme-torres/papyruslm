@@ -16,13 +16,29 @@ COPY src/ src/
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --no-dev --no-editable
 
-# Stage 2 — Runtime
+# Stage 2 — Frontend
+FROM node:24-slim AS frontend
+
+RUN npm install -g pnpm@12.15.0
+
+WORKDIR /frontend
+
+COPY frontend/package.json frontend/pnpm-lock.yaml ./
+
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
+
+COPY frontend/ ./
+RUN pnpm build
+
+# Stage 3 — Runtime
 FROM python:3.14-slim-bookworm AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata \
     DATA_DIR=/app/data \
+    FRONTEND_DIR=/app/frontend \
     HF_HOME=/app/.cache/huggingface
 
 RUN apt-get update && \
@@ -39,6 +55,7 @@ RUN mkdir -p /app/data /app/.cache/huggingface && \
     chown -R appuser:appuser /app
 
 COPY --from=builder --chown=appuser:appuser /app/.venv ./.venv
+COPY --from=frontend --chown=appuser:appuser /frontend/dist ./frontend
 COPY --chown=appuser:appuser alembic.ini ./
 COPY --chown=appuser:appuser alembic/ alembic/
 

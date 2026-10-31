@@ -8,6 +8,7 @@ from papyruslm.adapters.inbound.http.exception_handlers import register_exceptio
 from papyruslm.adapters.inbound.http.routers import health, v1
 from papyruslm.application.use_cases import SyncVectorIndexUseCase
 from papyruslm.ioc import create_container
+from papyruslm.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,10 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(health.router)
 app.include_router(v1.router)
+
+settings = get_settings()
+if settings.frontend_dir:
+    app.frontend("/", directory=settings.frontend_dir)
 
 register_exception_handlers(app)
 setup_dishka(create_container(), app)

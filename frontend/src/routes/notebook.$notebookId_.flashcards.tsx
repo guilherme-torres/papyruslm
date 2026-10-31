@@ -6,7 +6,7 @@ export interface FlashcardsSearch {
     page?: number
 }
 
-export const Route = createFileRoute('/notebooks/$notebookId_/flashcards')({
+export const Route = createFileRoute('/notebook/$notebookId_/flashcards')({
     validateSearch: (search: Record<string, unknown>): FlashcardsSearch => ({
         page: parsePage(search.page),
     }),

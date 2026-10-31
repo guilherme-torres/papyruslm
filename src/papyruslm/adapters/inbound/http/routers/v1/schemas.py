@@ -16,8 +16,12 @@ class TagResponse(BaseModel):
     name: str
 
 
+class TagListItemResponse(TagResponse):
+    notebooks_total: int
+
+
 class ListTagsResponse(BaseModel):
-    items: list[TagResponse]
+    items: list[TagListItemResponse]
 
 
 class NotebookResponse(BaseModel):

@@ -153,7 +153,7 @@ function NothingToReview({ notebookId, hasFlashcards }: NothingToReviewProps) {
                 <EmptyDescription>
                     {hasFlashcards
                         ? 'Nenhum flashcard para revisar agora. Volte mais tarde ou crie novos flashcards.'
-                        : 'Crie flashcards para revisar o conteúdo deste caderno com repetição espaçada.'}
+                        : 'Crie flashcards para revisar o conteúdo deste caderno.'}
                 </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>

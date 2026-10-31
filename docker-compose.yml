@@ -13,7 +13,7 @@ x-app: &app
     - papyruslm-data:/app/data
 
 services:
-  api:
+  app:
     <<: *app
     command:
       - sh
@@ -26,7 +26,7 @@ services:
     <<: *app
     command: papyruslm-worker
     depends_on:
-      api:
+      app:
         condition: service_healthy
     healthcheck:
       disable: true
