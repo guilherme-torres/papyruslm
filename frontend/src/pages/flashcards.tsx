@@ -58,7 +58,7 @@ export function FlashcardsPage() {
     const goToFirstPage = () => navigate({ search: { page: undefined } })
 
     return (
-        <main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
+        <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6">
             <div className="flex flex-wrap items-end justify-between gap-4">
                 <div className="flex min-w-0 items-start gap-2">
                     <Button
