@@ -46,16 +46,20 @@ class AskQuestionUseCase:
         if not await self._notebook_repository.exists_by_id(data.notebook_id):
             raise NotebookNotFound(data.notebook_id)
 
-        history = await self._message_repository.list_recent_messages(data.notebook_id, HISTORY_MESSAGES)
+        # history = await self._message_repository.list_recent_messages(data.notebook_id, HISTORY_MESSAGES)
         question = await self._message_repository.create_message(
             Message(notebook_id=data.notebook_id, role=MessageRole.USER, content=data.question)
         )
 
-        search_query = await self._search_query(history, question.content)
-        sources = self._chat_assistant.select_sources(search_query, await self._find_sources(data, search_query))
+        # search_query = await self._search_query(history, question.content)
+        sources = self._chat_assistant.select_sources(
+            question.content,
+            await self._find_sources(data, question.content),
+        )
 
         parts: list[str] = []
-        async for token in self._chat_assistant.stream_answer(history, search_query, sources):
+        # O prompt deixou de receber o histórico da conversa
+        async for token in self._chat_assistant.stream_answer([], question.content, sources):
             parts.append(token)
             yield AnswerDelta(token)
 
@@ -71,15 +75,15 @@ class AskQuestionUseCase:
         )
         yield AnswerCompleted(MessageOutput.from_entity(message))
 
-    async def _search_query(self, history: list[Message], question: str) -> str:
-        if not history:
-            return question
-        try:
-            rewritten = await self._chat_assistant.rewrite_question(history, question)
-        except Exception:
-            logger.exception("Failed to rewrite question, using the original")
-            return question
-        return rewritten.strip() or question
+    # async def _search_query(self, history: list[Message], question: str) -> str:
+    #     if not history:
+    #         return question
+    #     try:
+    #         rewritten = await self._chat_assistant.rewrite_question(history, question)
+    #     except Exception:
+    #         logger.exception("Failed to rewrite question, using the original")
+    #         return question
+    #     return rewritten.strip() or question
 
     async def _find_sources(self, data: AskQuestionInput, search_query: str) -> list[Source]:
         vector = await self._embedder.embed_query(search_query)

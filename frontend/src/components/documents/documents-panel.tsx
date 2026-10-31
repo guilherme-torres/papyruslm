@@ -74,7 +74,7 @@ export function DocumentsPanel({
             className={className}
             action={
                 onCollapse && (
-                    <PanelAction label="Recolher painel de documentos" side="right" onClick={onCollapse}>
+                    <PanelAction label="Recolher painel de documentos" onClick={onCollapse}>
                         <PanelLeftCloseIcon />
                     </PanelAction>
                 )

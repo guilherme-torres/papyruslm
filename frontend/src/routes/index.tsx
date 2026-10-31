@@ -1,14 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { parsePage } from '@/lib/search-params'
 import { Home } from '@/pages/home'
 
 export interface HomeSearch {
     page?: number
     tags?: string[]
-}
-
-function parsePage(value: unknown): number | undefined {
-    const page = Number(value)
-    return Number.isInteger(page) && page > 1 ? page : undefined
 }
 
 function parseTags(value: unknown): string[] | undefined {

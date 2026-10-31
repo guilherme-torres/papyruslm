@@ -81,7 +81,7 @@ export function NotebookCard({ notebook }: NotebookCardProps) {
                         {notebook.flashcards_due > 0 && <Badge>{notebook.flashcards_due} para revisar</Badge>}
                     </CardFooter>
                 </TooltipTrigger>
-                <TooltipContent>{notebook.name}</TooltipContent>
+                <TooltipContent side="bottom">{notebook.name}</TooltipContent>
             </Tooltip>
             <EditNotebookDialog notebook={notebook} open={editOpen} onOpenChange={setEditOpen} />
             <DeleteNotebookDialog notebook={notebook} open={deleteOpen} onOpenChange={setDeleteOpen} />

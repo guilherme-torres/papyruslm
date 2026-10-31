@@ -50,17 +50,24 @@ export function DocumentListItem({ notebookId, document, selected, onSelectedCha
                     )}
                     <span className="truncate">{document.filename}</span>
                 </TooltipTrigger>
-                <TooltipContent side="right">{document.filename}</TooltipContent>
+                <TooltipContent side="bottom">{document.filename}</TooltipContent>
             </Tooltip>
-            <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label={`Excluir ${document.filename}`}
-                disabled={isInProgress}
-                onClick={() => setDeleteOpen(true)}
-            >
-                <Trash2Icon />
-            </Button>
+            <Tooltip>
+                <TooltipTrigger
+                    render={
+                        <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label={`Excluir ${document.filename}`}
+                            disabled={isInProgress}
+                            onClick={() => setDeleteOpen(true)}
+                        />
+                    }
+                >
+                    <Trash2Icon />
+                </TooltipTrigger>
+                <TooltipContent side="bottom">Excluir documento</TooltipContent>
+            </Tooltip>
             <span className="flex size-8 shrink-0 items-center justify-center">
                 {isReady && (
                     <Checkbox
@@ -85,7 +92,7 @@ export function DocumentListItem({ notebookId, document, selected, onSelectedCha
                         >
                             <RotateCwIcon />
                         </TooltipTrigger>
-                        <TooltipContent side="right">Falha no processamento. Processar novamente</TooltipContent>
+                        <TooltipContent side="bottom">Falha no processamento. Processar novamente</TooltipContent>
                     </Tooltip>
                 )}
             </span>

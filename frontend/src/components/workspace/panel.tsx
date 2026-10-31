@@ -32,18 +32,17 @@ export function Panel({ title, action, className, children }: PanelProps) {
 
 interface PanelActionProps {
     label: string
-    side?: 'left' | 'right' | 'top' | 'bottom'
     onClick: () => void
     children: ReactNode
 }
 
-export function PanelAction({ label, side = 'bottom', onClick, children }: PanelActionProps) {
+export function PanelAction({ label, onClick, children }: PanelActionProps) {
     return (
         <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label={label} onClick={onClick} />}>
                 {children}
             </TooltipTrigger>
-            <TooltipContent side={side}>{label}</TooltipContent>
+            <TooltipContent side="bottom">{label}</TooltipContent>
         </Tooltip>
     )
 }
@@ -51,18 +50,17 @@ export function PanelAction({ label, side = 'bottom', onClick, children }: Panel
 interface CollapsedPanelProps {
     label: string
     expandLabel: string
-    side: 'left' | 'right'
     onExpand: () => void
     icon: ReactNode
 }
 
-export function CollapsedPanel({ label, expandLabel, side, onExpand, icon }: CollapsedPanelProps) {
+export function CollapsedPanel({ label, expandLabel, onExpand, icon }: CollapsedPanelProps) {
     return (
         <section
             aria-label={label}
             className="flex w-12 shrink-0 flex-col items-center rounded-xl bg-card py-2 text-card-foreground ring-1 ring-foreground/10"
         >
-            <PanelAction label={expandLabel} side={side === 'left' ? 'right' : 'left'} onClick={onExpand}>
+            <PanelAction label={expandLabel} onClick={onExpand}>
                 {icon}
             </PanelAction>
         </section>

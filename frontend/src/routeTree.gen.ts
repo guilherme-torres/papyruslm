@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NotebooksNotebookIdRouteImport } from './routes/notebooks.$notebookId'
+import { Route as NotebooksNotebookIdFlashcardsRouteImport } from './routes/notebooks.$notebookId_.flashcards'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,46 @@ const NotebooksNotebookIdRoute = NotebooksNotebookIdRouteImport.update({
   path: '/notebooks/$notebookId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotebooksNotebookIdFlashcardsRoute =
+  NotebooksNotebookIdFlashcardsRouteImport.update({
+    id: '/notebooks/$notebookId_/flashcards',
+    path: '/notebooks/$notebookId/flashcards',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/notebooks/$notebookId': typeof NotebooksNotebookIdRoute
+  '/notebooks/$notebookId/flashcards': typeof NotebooksNotebookIdFlashcardsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/notebooks/$notebookId': typeof NotebooksNotebookIdRoute
+  '/notebooks/$notebookId/flashcards': typeof NotebooksNotebookIdFlashcardsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/notebooks/$notebookId': typeof NotebooksNotebookIdRoute
+  '/notebooks/$notebookId_/flashcards': typeof NotebooksNotebookIdFlashcardsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/notebooks/$notebookId'
+  fullPaths:
+    '/' | '/notebooks/$notebookId' | '/notebooks/$notebookId/flashcards'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/notebooks/$notebookId'
-  id: '__root__' | '/' | '/notebooks/$notebookId'
+  to: '/' | '/notebooks/$notebookId' | '/notebooks/$notebookId/flashcards'
+  id:
+    | '__root__'
+    | '/'
+    | '/notebooks/$notebookId'
+    | '/notebooks/$notebookId_/flashcards'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   NotebooksNotebookIdRoute: typeof NotebooksNotebookIdRoute
+  NotebooksNotebookIdFlashcardsRoute: typeof NotebooksNotebookIdFlashcardsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +81,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotebooksNotebookIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notebooks/$notebookId_/flashcards': {
+      id: '/notebooks/$notebookId_/flashcards'
+      path: '/notebooks/$notebookId/flashcards'
+      fullPath: '/notebooks/$notebookId/flashcards'
+      preLoaderRoute: typeof NotebooksNotebookIdFlashcardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   NotebooksNotebookIdRoute: NotebooksNotebookIdRoute,
+  NotebooksNotebookIdFlashcardsRoute: NotebooksNotebookIdFlashcardsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

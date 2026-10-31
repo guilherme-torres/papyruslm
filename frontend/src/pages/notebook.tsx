@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { useQuery, type UseQueryResult } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
-import { ArrowLeftIcon, CircleAlertIcon, NotebookTabsIcon, PanelLeftIcon, PanelRightIcon } from 'lucide-react'
+import {
+    ArrowLeftIcon,
+    CircleAlertIcon,
+    GalleryVerticalEndIcon,
+    NotebookTabsIcon,
+    PanelLeftIcon,
+    PanelRightIcon,
+} from 'lucide-react'
 import type { NotebookDocument } from '@/api/documents'
 import type { Notebook } from '@/api/notebooks'
 import { ApiError } from '@/api/client'
@@ -73,9 +80,10 @@ export function NotebookPage() {
 
     return (
         <div className="flex h-full min-h-0 flex-col gap-3 p-3 sm:p-4">
-            <NotebookHeader notebookQuery={notebookQuery} />
+            <NotebookHeader notebookId={notebookId} notebookQuery={notebookQuery} />
             {isDesktop ? (
                 <DesktopWorkspace
+                    notebookId={notebookId}
                     documentsPanelProps={documentsPanelProps}
                     chatPanelProps={chatPanelProps}
                     documentsOpen={documentsOpen}
@@ -83,6 +91,7 @@ export function NotebookPage() {
                 />
             ) : (
                 <MobileWorkspace
+                    notebookId={notebookId}
                     documentsPanelProps={documentsPanelProps}
                     chatPanelProps={chatPanelProps}
                     tab={mobileTab}
@@ -101,38 +110,57 @@ function resolveViewer(state: ViewerState | null, documents: NotebookDocument[] 
 }
 
 interface NotebookHeaderProps {
+    notebookId: string
     notebookQuery: UseQueryResult<Notebook, Error>
 }
 
-function NotebookHeader({ notebookQuery }: NotebookHeaderProps) {
+function NotebookHeader({ notebookId, notebookQuery }: NotebookHeaderProps) {
     return (
-        <div className="flex min-w-0 shrink-0 items-center gap-2">
+        <div className="flex min-w-0 shrink-0 items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+                <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Voltar para Meus cadernos"
+                    nativeButton={false}
+                    render={<Link to="/" />}
+                >
+                    <ArrowLeftIcon />
+                </Button>
+                {notebookQuery.isSuccess ? (
+                    <h1 className="min-w-0 truncate font-heading text-xl font-medium">{notebookQuery.data.name}</h1>
+                ) : (
+                    <Skeleton className="h-6 w-56" />
+                )}
+            </div>
             <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Voltar para Meus cadernos"
+                variant="outline"
+                size="sm"
                 nativeButton={false}
-                render={<Link to="/" />}
+                render={<Link to="/notebooks/$notebookId/flashcards" params={{ notebookId }} />}
             >
-                <ArrowLeftIcon />
+                <GalleryVerticalEndIcon data-icon="inline-start" />
+                Gerenciar flashcards
             </Button>
-            {notebookQuery.isSuccess ? (
-                <h1 className="min-w-0 truncate font-heading text-xl font-medium">{notebookQuery.data.name}</h1>
-            ) : (
-                <Skeleton className="h-6 w-56" />
-            )}
         </div>
     )
 }
 
 interface DesktopWorkspaceProps {
+    notebookId: string
     documentsPanelProps: DocumentsPanelProps
     chatPanelProps: ChatPanelProps
     documentsOpen: boolean
     onDocumentsOpenChange: (open: boolean) => void
 }
 
-function DesktopWorkspace({ documentsPanelProps, chatPanelProps, documentsOpen, onDocumentsOpenChange }: DesktopWorkspaceProps) {
+function DesktopWorkspace({
+    notebookId,
+    documentsPanelProps,
+    chatPanelProps,
+    documentsOpen,
+    onDocumentsOpenChange,
+}: DesktopWorkspaceProps) {
     const [flashcardsOpen, setFlashcardsOpen] = useState(true)
 
     return (
@@ -150,19 +178,21 @@ function DesktopWorkspace({ documentsPanelProps, chatPanelProps, documentsOpen, 
                 <CollapsedPanel
                     label="Documentos"
                     expandLabel="Abrir painel de documentos"
-                    side="left"
                     onExpand={() => onDocumentsOpenChange(true)}
                     icon={<PanelLeftIcon />}
                 />
             )}
             <ChatPanel {...chatPanelProps} className="min-w-0 flex-1" />
             {flashcardsOpen ? (
-                <FlashcardsPanel onCollapse={() => setFlashcardsOpen(false)} className="w-80 shrink-0 xl:w-96" />
+                <FlashcardsPanel
+                    notebookId={notebookId}
+                    onCollapse={() => setFlashcardsOpen(false)}
+                    className="w-80 shrink-0 xl:w-96"
+                />
             ) : (
                 <CollapsedPanel
                     label="Flashcards"
                     expandLabel="Abrir painel de flashcards"
-                    side="right"
                     onExpand={() => setFlashcardsOpen(true)}
                     icon={<PanelRightIcon />}
                 />
@@ -172,13 +202,14 @@ function DesktopWorkspace({ documentsPanelProps, chatPanelProps, documentsOpen, 
 }
 
 interface MobileWorkspaceProps {
+    notebookId: string
     documentsPanelProps: DocumentsPanelProps
     chatPanelProps: ChatPanelProps
     tab: MobileTab
     onTabChange: (tab: MobileTab) => void
 }
 
-function MobileWorkspace({ documentsPanelProps, chatPanelProps, tab, onTabChange }: MobileWorkspaceProps) {
+function MobileWorkspace({ notebookId, documentsPanelProps, chatPanelProps, tab, onTabChange }: MobileWorkspaceProps) {
     return (
         <Tabs value={tab} onValueChange={(value: MobileTab) => onTabChange(value)} className="min-h-0 flex-1">
             <TabsList className="w-full shrink-0">
@@ -193,7 +224,7 @@ function MobileWorkspace({ documentsPanelProps, chatPanelProps, tab, onTabChange
                 <ChatPanel {...chatPanelProps} className="flex-1" />
             </TabsContent>
             <TabsContent value="flashcards" className="flex min-h-0">
-                <FlashcardsPanel className="flex-1" />
+                <FlashcardsPanel notebookId={notebookId} className="flex-1" />
             </TabsContent>
         </Tabs>
     )
