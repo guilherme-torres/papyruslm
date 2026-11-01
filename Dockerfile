@@ -7,7 +7,7 @@ ENV UV_COMPILE_BYTECODE=1 \
 
 WORKDIR /app
 
-COPY pyproject.toml uv.lock .python-version README.md ./
+COPY pyproject.toml uv.lock .python-version README.md LICENSE ./
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --no-install-project --no-dev

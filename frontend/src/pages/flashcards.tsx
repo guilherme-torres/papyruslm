@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getRouteApi, Link, useRouter } from '@tanstack/react-router'
 import { ArrowLeftIcon, CircleAlertIcon, GalleryVerticalEndIcon, NotebookTabsIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { ApiError } from '@/api/client'
 import { CreateFlashcardDialog } from '@/components/flashcards/create-flashcard-dialog'
 import { FlashcardListItem, FlashcardListItemSkeleton } from '@/components/flashcards/flashcard-list-item'
@@ -18,11 +19,8 @@ const route = getRouteApi('/notebook/$notebookId_/flashcards')
 
 const PAGE_SIZE = 20
 
-function flashcardsLabel(total: number): string {
-    return total === 1 ? '1 flashcard' : `${total} flashcards`
-}
-
 export function FlashcardsPage() {
+    const { t } = useTranslation()
     const { notebookId } = route.useParams()
     const { page = 1 } = route.useSearch()
     const navigate = route.useNavigate()
@@ -64,18 +62,18 @@ export function FlashcardsPage() {
                     <Button
                         variant="ghost"
                         size="icon-sm"
-                        aria-label="Voltar para o caderno"
+                        aria-label={t('flashcards.backToNotebook')}
                         nativeButton={false}
                         render={<Link to="/notebook/$notebookId" params={{ notebookId }} />}
                     >
                         <ArrowLeftIcon />
                     </Button>
                     <div className="flex min-w-0 flex-col gap-1">
-                        <h1 className="font-heading text-3xl font-medium">Flashcards</h1>
+                        <h1 className="font-heading text-3xl font-medium">{t('common.flashcards')}</h1>
                         {notebookQuery.isSuccess ? (
                             <p className="truncate text-sm text-muted-foreground">
                                 {notebookQuery.data.name}
-                                {flashcardsQuery.isSuccess && ` · ${flashcardsLabel(total)}`}
+                                {flashcardsQuery.isSuccess && ` · ${t('flashcards.count', { count: total })}`}
                             </p>
                         ) : (
                             <Skeleton className="h-5 w-48" />
@@ -96,11 +94,11 @@ export function FlashcardsPage() {
             {flashcardsQuery.isError && (
                 <Alert variant="destructive">
                     <CircleAlertIcon />
-                    <AlertTitle>Não foi possível carregar os flashcards</AlertTitle>
+                    <AlertTitle>{t('flashcards.loadError')}</AlertTitle>
                     <AlertDescription>{flashcardsQuery.error.message}</AlertDescription>
                     <AlertAction>
                         <Button variant="outline" size="sm" onClick={() => void flashcardsQuery.refetch()}>
-                            Tentar novamente
+                            {t('common.retry')}
                         </Button>
                     </AlertAction>
                 </Alert>
@@ -112,9 +110,9 @@ export function FlashcardsPage() {
                         <EmptyMedia variant="icon">
                             <GalleryVerticalEndIcon />
                         </EmptyMedia>
-                        <EmptyTitle>Nenhum flashcard ainda</EmptyTitle>
+                        <EmptyTitle>{t('flashcards.emptyTitle')}</EmptyTitle>
                         <EmptyDescription>
-                            Crie flashcards para revisar o conteúdo deste caderno.
+                            {t('flashcards.emptyDescription')}
                         </EmptyDescription>
                     </EmptyHeader>
                     <EmptyContent>
@@ -143,6 +141,7 @@ export function FlashcardsPage() {
 }
 
 function NotebookNotFound() {
+    const { t } = useTranslation()
     return (
         <main className="mx-auto flex w-full max-w-4xl flex-col px-4 py-10 sm:px-6">
             <Empty className="border">
@@ -150,12 +149,12 @@ function NotebookNotFound() {
                     <EmptyMedia variant="icon">
                         <NotebookTabsIcon />
                     </EmptyMedia>
-                    <EmptyTitle>Caderno não encontrado</EmptyTitle>
-                    <EmptyDescription>Este caderno não existe ou foi excluído.</EmptyDescription>
+                    <EmptyTitle>{t('common.notebookNotFound')}</EmptyTitle>
+                    <EmptyDescription>{t('flashcards.notebookNotFoundDescription')}</EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
                     <Button variant="outline" nativeButton={false} render={<Link to="/" />}>
-                        Voltar para Meus cadernos
+                        {t('common.backToNotebooks')}
                     </Button>
                 </EmptyContent>
             </Empty>

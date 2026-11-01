@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Citation } from '@/api/messages'
 import { AssistantMarkdown } from '@/components/chat/assistant-markdown'
 import { Bubble, BubbleContent } from '@/components/ui/bubble'
@@ -28,6 +29,7 @@ interface AssistantMessageProps {
 }
 
 export function AssistantMessage({ content, citations, model, streaming = false, onOpenCitation }: AssistantMessageProps) {
+    const { t } = useTranslation()
     return (
         <Message>
             <MessageContent className="gap-2">
@@ -37,18 +39,19 @@ export function AssistantMessage({ content, citations, model, streaming = false,
                     streaming={streaming}
                     onOpenCitation={onOpenCitation}
                 />
-                {model && <MessageFooter className="px-0 text-xs text-muted-foreground">Respondido com {model}</MessageFooter>}
+                {model && <MessageFooter className="px-0 text-xs text-muted-foreground">{t('chat.answeredWith', { model })}</MessageFooter>}
             </MessageContent>
         </Message>
     )
 }
 
 export function ThinkingMessage() {
+    const { t } = useTranslation()
     return (
         <Message>
             <MessageContent>
                 <span role="status" className="shimmer text-sm text-muted-foreground">
-                    Lendo as fontes…
+                    {t('chat.thinking')}
                 </span>
             </MessageContent>
         </Message>

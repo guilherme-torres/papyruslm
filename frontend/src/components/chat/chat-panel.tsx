@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { CircleAlertIcon, MessagesSquareIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Citation } from '@/api/messages'
 import { AssistantMessage, ThinkingMessage, UserMessage } from '@/components/chat/chat-message'
 import { ChatComposer } from '@/components/chat/chat-composer'
@@ -33,6 +34,7 @@ function isAbortError(error: Error | null): boolean {
 }
 
 export function ChatPanel({ notebookId, chat, selectedDocumentIds, onOpenCitation, className }: ChatPanelProps) {
+    const { t } = useTranslation()
     const messagesQuery = useQuery(latestMessagesQueryOptions(notebookId))
     const messages = messagesQuery.data ?? []
     const answerSaved = chat.completedMessageId !== null && messages.some((message) => message.id === chat.completedMessageId)
@@ -46,7 +48,7 @@ export function ChatPanel({ notebookId, chat, selectedDocumentIds, onOpenCitatio
 
     return (
         <Panel
-            title="Chat"
+            title={t('common.chat')}
             className={className}
             action={<ClearChatDialog notebookId={notebookId} disabled={messages.length === 0 || chat.isPending} />}
         >
@@ -61,11 +63,11 @@ export function ChatPanel({ notebookId, chat, selectedDocumentIds, onOpenCitatio
                     <div className="p-4">
                         <Alert variant="destructive">
                             <CircleAlertIcon />
-                            <AlertTitle>Não foi possível carregar a conversa</AlertTitle>
+                            <AlertTitle>{t('chat.loadError')}</AlertTitle>
                             <AlertDescription>{messagesQuery.error.message}</AlertDescription>
                             <AlertAction>
                                 <Button variant="outline" size="sm" onClick={() => void messagesQuery.refetch()}>
-                                    Tentar novamente
+                                    {t('common.retry')}
                                 </Button>
                             </AlertAction>
                         </Alert>
@@ -77,9 +79,9 @@ export function ChatPanel({ notebookId, chat, selectedDocumentIds, onOpenCitatio
                             <EmptyMedia variant="icon">
                                 <MessagesSquareIcon />
                             </EmptyMedia>
-                            <EmptyTitle>Converse com seus documentos</EmptyTitle>
+                            <EmptyTitle>{t('chat.emptyTitle')}</EmptyTitle>
                             <EmptyDescription>
-                                Faça uma pergunta e a resposta virá com citações para as fontes selecionadas.
+                                {t('chat.emptyDescription')}
                             </EmptyDescription>
                         </EmptyHeader>
                     </Empty>
@@ -128,7 +130,7 @@ export function ChatPanel({ notebookId, chat, selectedDocumentIds, onOpenCitatio
                                         <MessageScrollerItem messageId="answer-error">
                                             <Alert variant="destructive">
                                                 <CircleAlertIcon />
-                                                <AlertTitle>Não foi possível responder</AlertTitle>
+                                                <AlertTitle>{t('chat.answerError')}</AlertTitle>
                                                 <AlertDescription>{chat.error?.message}</AlertDescription>
                                             </Alert>
                                         </MessageScrollerItem>

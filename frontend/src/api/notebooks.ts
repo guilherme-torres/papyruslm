@@ -21,11 +21,11 @@ export interface ListNotebooksParams extends PaginationParams {
     tags?: string[]
 }
 
-const NOT_FOUND = 'Caderno não encontrado.'
+const NOT_FOUND = 'notebookNotFound'
 
 const SAVE_ERRORS: ErrorMessages = {
     404: NOT_FOUND,
-    422: 'Verifique o nome e as tags do caderno.',
+    422: 'notebookInvalid',
 }
 
 export function listNotebooks(params: ListNotebooksParams = {}, signal?: AbortSignal): Promise<Paginated<NotebookListItem>> {

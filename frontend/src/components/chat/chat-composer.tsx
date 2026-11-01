@@ -1,5 +1,6 @@
 import { useRef, useState, type FormEvent } from 'react'
 import { ArrowUpIcon, SquareIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupText, InputGroupTextarea } from '@/components/ui/input-group'
 
 interface ChatComposerProps {
@@ -9,12 +10,8 @@ interface ChatComposerProps {
     onStop: () => void
 }
 
-function sourcesLabel(count: number): string {
-    if (count === 0) return 'Nenhuma fonte selecionada'
-    return count === 1 ? '1 fonte' : `${count} fontes`
-}
-
 export function ChatComposer({ selectedSourcesCount, isAnswering, onSubmit, onStop }: ChatComposerProps) {
+    const { t } = useTranslation()
     const [question, setQuestion] = useState('')
     const formRef = useRef<HTMLFormElement>(null)
     const hasSources = selectedSourcesCount > 0
@@ -39,18 +36,18 @@ export function ChatComposer({ selectedSourcesCount, isAnswering, onSubmit, onSt
                             formRef.current?.requestSubmit()
                         }
                     }}
-                    placeholder={hasSources ? 'Pergunte algo sobre os documentos' : 'Selecione ao menos uma fonte para perguntar'}
-                    aria-label="Pergunta"
+                    placeholder={hasSources ? t('chat.placeholder') : t('chat.placeholderNoSources')}
+                    aria-label={t('chat.question')}
                     className="max-h-40 min-h-14"
                 />
                 <InputGroupAddon align="block-end">
-                    <InputGroupText>{sourcesLabel(selectedSourcesCount)}</InputGroupText>
+                    <InputGroupText>{t('chat.sources', { count: selectedSourcesCount })}</InputGroupText>
                     {isAnswering ? (
                         <InputGroupButton
                             variant="default"
                             size="icon-sm"
                             className="ml-auto"
-                            aria-label="Parar resposta"
+                            aria-label={t('chat.stop')}
                             onClick={onStop}
                         >
                             <SquareIcon />
@@ -61,7 +58,7 @@ export function ChatComposer({ selectedSourcesCount, isAnswering, onSubmit, onSt
                             variant="default"
                             size="icon-sm"
                             className="ml-auto"
-                            aria-label="Enviar pergunta"
+                            aria-label={t('chat.send')}
                             disabled={!canSend}
                         >
                             <ArrowUpIcon />

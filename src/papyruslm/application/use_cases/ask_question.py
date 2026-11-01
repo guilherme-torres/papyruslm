@@ -58,7 +58,6 @@ class AskQuestionUseCase:
         )
 
         parts: list[str] = []
-        # O prompt deixou de receber o histórico da conversa
         async for token in self._chat_assistant.stream_answer([], question.content, sources):
             parts.append(token)
             yield AnswerDelta(token)

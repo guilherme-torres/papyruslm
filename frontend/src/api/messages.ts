@@ -1,4 +1,4 @@
-import { ApiError, http, type Paginated, type PaginationParams } from '@/api/client'
+import { ApiError, http, translateError, type Paginated, type PaginationParams } from '@/api/client'
 
 export type MessageRole = 'user' | 'assistant'
 
@@ -34,8 +34,8 @@ export interface AskQuestionInput {
     document_ids?: string[]
 }
 
-const NOTEBOOK_NOT_FOUND = 'Caderno não encontrado.'
-const ANSWER_ERROR = 'Não foi possível gerar a resposta. Tente novamente.'
+const NOTEBOOK_NOT_FOUND = 'notebookNotFound'
+const ANSWER_ERROR = 'answerFailed'
 
 export function listMessages(notebookId: string, params: PaginationParams = {}, signal?: AbortSignal): Promise<Paginated<Message>> {
     return http.get(`/notebooks/${notebookId}/messages`, {
@@ -52,7 +52,7 @@ export function clearMessages(notebookId: string): Promise<void> {
 export function getCitationSource(notebookId: string, messageId: string, index: number, signal?: AbortSignal): Promise<CitationSource> {
     return http.get(`/notebooks/${notebookId}/messages/${messageId}/citations/${index}/source`, {
         signal,
-        errorMessages: { 404: 'Não foi possível localizar o trecho citado.' },
+        errorMessages: { 404: 'citationNotFound' },
     })
 }
 
@@ -61,7 +61,7 @@ export async function* askQuestion(notebookId: string, input: AskQuestionInput, 
         signal,
         errorMessages: {
             404: NOTEBOOK_NOT_FOUND,
-            422: 'Escreva uma pergunta antes de enviar.',
+            422: 'questionEmpty',
             500: ANSWER_ERROR,
         },
     })
@@ -70,5 +70,5 @@ export async function* askQuestion(notebookId: string, input: AskQuestionInput, 
         if (event === 'done') return JSON.parse(data) as Message
         if (event === 'error') break
     }
-    throw new ApiError(500, ANSWER_ERROR)
+    throw new ApiError(500, translateError(ANSWER_ERROR))
 }

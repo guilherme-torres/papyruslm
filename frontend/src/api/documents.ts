@@ -17,30 +17,30 @@ export interface DocumentContent {
     text: string
 }
 
-const NOT_FOUND = 'Documento não encontrado.'
+const NOT_FOUND = 'documentNotFound'
 
 const UPLOAD_ERRORS: ErrorMessages = {
-    404: 'Caderno não encontrado.',
-    422: 'Formato de arquivo não suportado ou arquivo grande demais.',
-    503: 'Não foi possível salvar o arquivo. Tente novamente mais tarde.',
+    404: 'notebookNotFound',
+    422: 'documentUnsupported',
+    503: 'documentStorage',
 }
 
 const REPROCESS_ERRORS: ErrorMessages = {
     404: NOT_FOUND,
-    409: 'Este documento já está na fila ou em processamento.',
+    409: 'documentBusy',
 }
 
 export function listDocuments(notebookId: string, signal?: AbortSignal): Promise<NotebookDocument[]> {
     return http.get(`/notebooks/${notebookId}/documents`, {
         signal,
-        errorMessages: { 404: 'Caderno não encontrado.' },
+        errorMessages: { 404: 'notebookNotFound' },
     })
 }
 
 export function getDocumentContent(id: string, signal?: AbortSignal): Promise<DocumentContent> {
     return http.get(`/documents/${id}/content`, {
         signal,
-        errorMessages: { 404: 'O texto deste documento ainda não está disponível.' },
+        errorMessages: { 404: 'documentTextUnavailable' },
     })
 }
 

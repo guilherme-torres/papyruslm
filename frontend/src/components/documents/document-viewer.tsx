@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { CircleAlertIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { NotebookDocument } from '@/api/documents'
 import { TextSkeleton } from '@/components/documents/text-skeleton'
 import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -13,6 +14,7 @@ interface DocumentViewerProps {
 }
 
 export function DocumentViewer({ notebookId, document }: DocumentViewerProps) {
+    const { t } = useTranslation()
     const contentQuery = useQuery(documentContentQueryOptions(notebookId, document.id))
 
     if (contentQuery.isPending) return <TextSkeleton />
@@ -22,11 +24,11 @@ export function DocumentViewer({ notebookId, document }: DocumentViewerProps) {
             <div className="p-4">
                 <Alert variant="destructive">
                     <CircleAlertIcon />
-                    <AlertTitle>Não foi possível abrir o documento</AlertTitle>
+                    <AlertTitle>{t('documents.openError')}</AlertTitle>
                     <AlertDescription>{contentQuery.error.message}</AlertDescription>
                     <AlertAction>
                         <Button variant="outline" size="sm" onClick={() => void contentQuery.refetch()}>
-                            Tentar novamente
+                            {t('common.retry')}
                         </Button>
                     </AlertAction>
                 </Alert>

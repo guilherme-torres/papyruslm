@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { EllipsisVerticalIcon, PencilIcon, Trash2Icon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Flashcard } from '@/api/flashcards'
 import { DeleteFlashcardDialog } from '@/components/flashcards/delete-flashcard-dialog'
 import { EditFlashcardDialog } from '@/components/flashcards/edit-flashcard-dialog'
@@ -24,21 +25,18 @@ function daysUntil(date: Date, now: number): number {
     return Math.round((startOfDueDay.getTime() - startOfToday.getTime()) / MS_PER_DAY)
 }
 
-function reviewLabel(days: number): string {
-    if (days <= 0) return 'Revisão hoje'
-    return days === 1 ? 'Revisão em 1 dia' : `Revisão em ${days} dias`
-}
-
 interface FlashcardListItemProps {
     flashcard: Flashcard
 }
 
 export function FlashcardListItem({ flashcard }: FlashcardListItemProps) {
+    const { t } = useTranslation()
     const [editOpen, setEditOpen] = useState(false)
     const [deleteOpen, setDeleteOpen] = useState(false)
     const [renderedAt] = useState(() => Date.now())
     const dueDate = new Date(flashcard.due_date)
     const isDue = dueDate.getTime() <= renderedAt
+    const daysLeft = daysUntil(dueDate, renderedAt)
 
     return (
         <>
@@ -49,13 +47,13 @@ export function FlashcardListItem({ flashcard }: FlashcardListItemProps) {
                 </ItemContent>
                 <ItemActions>
                     {isDue ? (
-                        <Badge>Para revisar</Badge>
+                        <Badge>{t('flashcards.due')}</Badge>
                     ) : (
-                        <Badge variant="outline">{reviewLabel(daysUntil(dueDate, renderedAt))}</Badge>
+                        <Badge variant="outline">{daysLeft <= 0 ? t('flashcards.reviewToday') : t('flashcards.reviewIn', { count: daysLeft })}</Badge>
                     )}
                     <DropdownMenu>
                         <DropdownMenuTrigger
-                            render={<Button variant="ghost" size="icon-sm" aria-label="Opções do flashcard" />}
+                            render={<Button variant="ghost" size="icon-sm" aria-label={t('flashcards.options')} />}
                         >
                             <EllipsisVerticalIcon />
                         </DropdownMenuTrigger>
@@ -63,11 +61,11 @@ export function FlashcardListItem({ flashcard }: FlashcardListItemProps) {
                             <DropdownMenuGroup>
                                 <DropdownMenuItem onClick={() => setEditOpen(true)}>
                                     <PencilIcon />
-                                    Editar
+                                    {t('common.edit')}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
                                     <Trash2Icon />
-                                    Excluir
+                                    {t('common.delete')}
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
                         </DropdownMenuContent>

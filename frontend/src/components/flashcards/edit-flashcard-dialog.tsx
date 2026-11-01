@@ -1,4 +1,5 @@
 import { useRef, type RefObject } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Flashcard } from '@/api/flashcards'
 import { FlashcardForm } from '@/components/flashcards/flashcard-form'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
@@ -29,14 +30,15 @@ interface EditFlashcardFormProps {
 }
 
 function EditFlashcardForm({ flashcard, frontRef, onSaved }: EditFlashcardFormProps) {
+    const { t } = useTranslation()
     const updateFlashcard = useUpdateFlashcard(flashcard.notebook_id)
 
     return (
         <FlashcardForm
-            title="Editar flashcard"
-            description="Altere a frente e o verso do flashcard."
-            submitLabel="Salvar alterações"
-            errorTitle="Não foi possível salvar o flashcard"
+            title={t('flashcards.editTitle')}
+            description={t('flashcards.editDescription')}
+            submitLabel={t('common.saveChanges')}
+            errorTitle={t('flashcards.saveError')}
             defaultValues={{ front: flashcard.front, back: flashcard.back }}
             frontRef={frontRef}
             isPending={updateFlashcard.isPending}

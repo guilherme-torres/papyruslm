@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { ArrowRightIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Citation } from '@/api/messages'
 import { Button } from '@/components/ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
@@ -10,6 +11,7 @@ interface CitationButtonProps {
 }
 
 export function CitationButton({ citation, onOpen }: CitationButtonProps) {
+    const { t } = useTranslation()
     return (
         <HoverCard>
             <HoverCardTrigger
@@ -20,7 +22,7 @@ export function CitationButton({ citation, onOpen }: CitationButtonProps) {
                         variant="secondary"
                         size="xs"
                         className="mx-0.5 align-baseline tabular-nums"
-                        aria-label={`Fonte ${citation.index}: ${citation.document_name}`}
+                        aria-label={t('chat.citationLabel', { index: citation.index, document: citation.document_name })}
                         onClick={() => onOpen(citation)}
                     />
                 }
@@ -38,7 +40,7 @@ export function CitationButton({ citation, onOpen }: CitationButtonProps) {
                     className="h-auto self-end px-0 underline decoration-dotted hover:decoration-solid"
                     onClick={() => onOpen(citation)}
                 >
-                    Ir para a fonte
+                    {t('chat.goToSource')}
                     <ArrowRightIcon data-icon="inline-end" />
                 </Button>
             </HoverCardContent>

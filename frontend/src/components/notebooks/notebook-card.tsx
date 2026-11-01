@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { EllipsisVerticalIcon, PencilIcon, Trash2Icon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { NotebookListItem } from '@/api/notebooks'
 import { DeleteNotebookDialog } from '@/components/notebooks/delete-notebook-dialog'
 import { EditNotebookDialog } from '@/components/notebooks/edit-notebook-dialog'
@@ -21,11 +22,8 @@ interface NotebookCardProps {
     notebook: NotebookListItem
 }
 
-function flashcardsLabel(total: number): string {
-    return total === 1 ? '1 flashcard' : `${total} flashcards`
-}
-
 export function NotebookCard({ notebook }: NotebookCardProps) {
+    const { t } = useTranslation()
     const [editOpen, setEditOpen] = useState(false)
     const [deleteOpen, setDeleteOpen] = useState(false)
 
@@ -50,7 +48,7 @@ export function NotebookCard({ notebook }: NotebookCardProps) {
                         <CardAction className="relative z-10">
                             <DropdownMenu>
                                 <DropdownMenuTrigger
-                                    render={<Button variant="ghost" size="icon-sm" aria-label="Opções do caderno" />}
+                                    render={<Button variant="ghost" size="icon-sm" aria-label={t('notebooks.options')} />}
                                 >
                                     <EllipsisVerticalIcon />
                                 </DropdownMenuTrigger>
@@ -58,11 +56,11 @@ export function NotebookCard({ notebook }: NotebookCardProps) {
                                     <DropdownMenuGroup>
                                         <DropdownMenuItem onClick={() => setEditOpen(true)}>
                                             <PencilIcon />
-                                            Editar
+                                            {t('common.edit')}
                                         </DropdownMenuItem>
                                         <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
                                             <Trash2Icon />
-                                            Excluir
+                                            {t('common.delete')}
                                         </DropdownMenuItem>
                                     </DropdownMenuGroup>
                                 </DropdownMenuContent>
@@ -77,8 +75,8 @@ export function NotebookCard({ notebook }: NotebookCardProps) {
                         ))}
                     </CardContent>
                     <CardFooter className="flex items-center justify-between gap-2 text-muted-foreground">
-                        <span>{flashcardsLabel(notebook.flashcards_total)}</span>
-                        {notebook.flashcards_due > 0 && <Badge>{notebook.flashcards_due} para revisar</Badge>}
+                        <span>{t('notebooks.flashcardCount', { count: notebook.flashcards_total })}</span>
+                        {notebook.flashcards_due > 0 && <Badge>{t('notebooks.dueCount', { count: notebook.flashcards_due })}</Badge>}
                     </CardFooter>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">{notebook.name}</TooltipContent>

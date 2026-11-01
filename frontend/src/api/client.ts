@@ -1,22 +1,28 @@
-const BASE_URL = '/api/v1'
+import { i18n } from '@/i18n'
+import type ptBR from '@/i18n/locales/pt-BR.json'
 
-const FALLBACK_ERROR_MESSAGE = 'Ocorreu um erro inesperado. Tente novamente.'
-const NETWORK_ERROR_MESSAGE = 'Não foi possível conectar ao servidor.'
+const BASE_URL = '/api/v1'
 
 type QueryValue = string | number | boolean | null | undefined | readonly (string | number | boolean)[]
 
 export type QueryParams = Record<string, QueryValue>
 
-export type ErrorMessages = Partial<Record<number, string>>
+export type ErrorKey = keyof typeof ptBR.errors
+
+export type ErrorMessages = Partial<Record<number, ErrorKey>>
 
 const DEFAULT_ERROR_MESSAGES: ErrorMessages = {
-    400: 'A requisição é inválida.',
-    404: 'O recurso solicitado não foi encontrado.',
-    409: 'A operação não pode ser realizada no estado atual.',
-    413: 'O arquivo enviado é grande demais.',
-    422: 'Os dados enviados são inválidos.',
-    500: 'Ocorreu um erro inesperado no servidor.',
-    503: 'O serviço está indisponível no momento. Tente novamente mais tarde.',
+    400: 'badRequest',
+    404: 'notFound',
+    409: 'conflict',
+    413: 'payloadTooLarge',
+    422: 'unprocessable',
+    500: 'server',
+    503: 'unavailable',
+}
+
+export function translateError(key: ErrorKey): string {
+    return i18n.t(`errors.${key}`)
 }
 
 export interface RequestOptions {
@@ -84,11 +90,11 @@ function isAbortError(error: unknown): boolean {
 
 function toApiError(error: unknown): unknown {
     if (isAbortError(error) || error instanceof ApiError) return error
-    return new ApiError(0, NETWORK_ERROR_MESSAGE)
+    return new ApiError(0, translateError('network'))
 }
 
 function errorMessageFor(status: number, errorMessages: ErrorMessages = {}): string {
-    return errorMessages[status] ?? DEFAULT_ERROR_MESSAGES[status] ?? FALLBACK_ERROR_MESSAGE
+    return translateError(errorMessages[status] ?? DEFAULT_ERROR_MESSAGES[status] ?? 'fallback')
 }
 
 async function send(path: string, { method, query, body, signal, errorMessages, accept }: SendOptions): Promise<Response> {
@@ -115,7 +121,7 @@ async function request<T>(path: string, method: Method, body: unknown, options: 
         return (await response.json()) as T
     } catch (error) {
         if (isAbortError(error)) throw error
-        throw new ApiError(response.status, FALLBACK_ERROR_MESSAGE)
+        throw new ApiError(response.status, translateError('fallback'))
     }
 }
 
@@ -135,7 +141,7 @@ function parseEvent(block: string): ServerSentEvent | null {
 
 async function* stream(path: string, body: unknown, options: RequestOptions = {}): AsyncGenerator<ServerSentEvent> {
     const response = await send(path, { ...options, method: 'POST', body, accept: 'text/event-stream' })
-    if (!response.body) throw new ApiError(response.status, FALLBACK_ERROR_MESSAGE)
+    if (!response.body) throw new ApiError(response.status, translateError('fallback'))
     const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
     let buffer = ''
     try {

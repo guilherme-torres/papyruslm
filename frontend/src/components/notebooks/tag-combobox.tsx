@@ -1,4 +1,5 @@
 import { Fragment, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
     Combobox,
     ComboboxChip,
@@ -23,6 +24,7 @@ interface TagComboboxProps {
 }
 
 export function TagCombobox({ id, options, value, onValueChange, disabled }: TagComboboxProps) {
+    const { t } = useTranslation()
     const anchor = useComboboxAnchor()
     const [inputValue, setInputValue] = useState('')
     const typedTag = inputValue.trim()
@@ -52,18 +54,18 @@ export function TagCombobox({ id, options, value, onValueChange, disabled }: Tag
                             <ComboboxChipsInput
                                 id={id}
                                 maxLength={TAG_NAME_MAX_LENGTH}
-                                placeholder={selected.length > 0 ? undefined : 'Escolha ou digite uma tag'}
+                                placeholder={selected.length > 0 ? undefined : t('notebooks.tagPlaceholder')}
                             />
                         </Fragment>
                     )}
                 </ComboboxValue>
             </ComboboxChips>
             <ComboboxContent anchor={anchor}>
-                <ComboboxEmpty>Digite para criar uma tag.</ComboboxEmpty>
+                <ComboboxEmpty>{t('notebooks.tagEmpty')}</ComboboxEmpty>
                 <ComboboxList>
                     {(tag: string) => (
                         <ComboboxItem key={tag} value={tag}>
-                            {isNewTag && tag === typedTag ? `Criar tag “${tag}”` : tag}
+                            {isNewTag && tag === typedTag ? t('notebooks.createTag', { tag }) : tag}
                         </ComboboxItem>
                     )}
                 </ComboboxList>

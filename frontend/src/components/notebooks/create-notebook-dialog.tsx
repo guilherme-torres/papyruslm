@@ -1,13 +1,13 @@
 import { useRef, useState, type RefObject } from 'react'
 import { PlusIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { NotebookForm } from '@/components/notebooks/notebook-form'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { useCreateNotebook } from '@/queries/notebooks'
 
-const DEFAULT_NOTEBOOK_NAME = 'Caderno sem título'
-
 export function CreateNotebookDialog() {
+    const { t } = useTranslation()
     const [open, setOpen] = useState(false)
     const nameRef = useRef<HTMLInputElement>(null)
 
@@ -15,7 +15,7 @@ export function CreateNotebookDialog() {
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger render={<Button />}>
                 <PlusIcon data-icon="inline-start" />
-                Criar caderno
+                {t('notebooks.create')}
             </DialogTrigger>
             <DialogContent initialFocus={nameRef}>
                 <CreateNotebookForm nameRef={nameRef} onCreated={() => setOpen(false)} />
@@ -30,15 +30,16 @@ interface CreateNotebookFormProps {
 }
 
 function CreateNotebookForm({ nameRef, onCreated }: CreateNotebookFormProps) {
+    const { t } = useTranslation()
     const createNotebook = useCreateNotebook()
 
     return (
         <NotebookForm
-            title="Criar caderno"
-            description="Dê um nome ao caderno e organize-o com tags, se quiser."
-            submitLabel="Criar caderno"
-            errorTitle="Não foi possível criar o caderno"
-            defaultValues={{ name: DEFAULT_NOTEBOOK_NAME, tags: [] }}
+            title={t('notebooks.create')}
+            description={t('notebooks.createDescription')}
+            submitLabel={t('notebooks.create')}
+            errorTitle={t('notebooks.createError')}
+            defaultValues={{ name: t('notebooks.defaultName'), tags: [] }}
             nameRef={nameRef}
             isPending={createNotebook.isPending}
             error={createNotebook.error}

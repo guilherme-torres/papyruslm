@@ -1,5 +1,6 @@
 import { useState, type FormEvent, type RefObject } from 'react'
 import { CircleAlertIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { UpdateFlashcardInput } from '@/api/flashcards'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -33,11 +34,12 @@ export function FlashcardForm({
     error,
     onSubmit,
 }: FlashcardFormProps) {
+    const { t } = useTranslation()
     const [front, setFront] = useState(defaultValues.front)
     const [back, setBack] = useState(defaultValues.back)
     const [submitted, setSubmitted] = useState(false)
-    const frontError = submitted && front.trim() === '' ? 'Informe a frente do flashcard.' : undefined
-    const backError = submitted && back.trim() === '' ? 'Informe o verso do flashcard.' : undefined
+    const frontError = submitted && front.trim() === '' ? t('flashcards.frontRequired') : undefined
+    const backError = submitted && back.trim() === '' ? t('flashcards.backRequired') : undefined
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -54,12 +56,12 @@ export function FlashcardForm({
             </DialogHeader>
             <FieldGroup>
                 <Field data-invalid={frontError !== undefined}>
-                    <FieldLabel htmlFor="flashcard-front">Frente</FieldLabel>
+                    <FieldLabel htmlFor="flashcard-front">{t('flashcards.front')}</FieldLabel>
                     <Textarea
                         id="flashcard-front"
                         ref={frontRef}
                         required
-                        placeholder="A pergunta ou o termo"
+                        placeholder={t('flashcards.frontPlaceholder')}
                         className="max-h-48"
                         value={front}
                         onChange={(event) => setFront(event.target.value)}
@@ -68,11 +70,11 @@ export function FlashcardForm({
                     <FieldError>{frontError}</FieldError>
                 </Field>
                 <Field data-invalid={backError !== undefined}>
-                    <FieldLabel htmlFor="flashcard-back">Verso</FieldLabel>
+                    <FieldLabel htmlFor="flashcard-back">{t('flashcards.back')}</FieldLabel>
                     <Textarea
                         id="flashcard-back"
                         required
-                        placeholder="A resposta ou a definição"
+                        placeholder={t('flashcards.backPlaceholder')}
                         className="max-h-64"
                         value={back}
                         onChange={(event) => setBack(event.target.value)}
@@ -89,7 +91,7 @@ export function FlashcardForm({
                 </Alert>
             )}
             <DialogFooter>
-                <DialogClose render={<Button type="button" variant="outline" />}>Cancelar</DialogClose>
+                <DialogClose render={<Button type="button" variant="outline" />}>{t('common.cancel')}</DialogClose>
                 <Button type="submit" disabled={isPending}>
                     {isPending && <Spinner data-icon="inline-start" />}
                     {submitLabel}

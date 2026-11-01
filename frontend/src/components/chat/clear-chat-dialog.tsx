@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { CircleAlertIcon, MessageSquareXIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import {
     AlertDialog,
@@ -23,12 +24,13 @@ interface ClearChatDialogProps {
 }
 
 export function ClearChatDialog({ notebookId, disabled }: ClearChatDialogProps) {
+    const { t } = useTranslation()
     const [open, setOpen] = useState(false)
 
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger render={<Button variant="ghost" size="sm" disabled={disabled} />}>
-                Limpar conversa
+                {t('chat.clear')}
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <ClearChatConfirmation notebookId={notebookId} onCleared={() => setOpen(false)} />
@@ -43,6 +45,7 @@ interface ClearChatConfirmationProps {
 }
 
 function ClearChatConfirmation({ notebookId, onCleared }: ClearChatConfirmationProps) {
+    const { t } = useTranslation()
     const clearMessages = useClearMessages(notebookId)
 
     return (
@@ -51,28 +54,27 @@ function ClearChatConfirmation({ notebookId, onCleared }: ClearChatConfirmationP
                 <AlertDialogMedia className="bg-destructive/10 text-destructive">
                     <MessageSquareXIcon />
                 </AlertDialogMedia>
-                <AlertDialogTitle>Limpar a conversa?</AlertDialogTitle>
+                <AlertDialogTitle>{t('chat.clearTitle')}</AlertDialogTitle>
                 <AlertDialogDescription>
-                    Todas as perguntas e respostas deste caderno serão apagadas. Os documentos e flashcards continuam
-                    como estão.
+                    {t('chat.clearDescription')}
                 </AlertDialogDescription>
             </AlertDialogHeader>
             {clearMessages.isError && (
                 <Alert variant="destructive">
                     <CircleAlertIcon />
-                    <AlertTitle>Não foi possível limpar a conversa</AlertTitle>
+                    <AlertTitle>{t('chat.clearError')}</AlertTitle>
                     <AlertDescription>{clearMessages.error.message}</AlertDescription>
                 </Alert>
             )}
             <AlertDialogFooter>
-                <AlertDialogCancel disabled={clearMessages.isPending}>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel disabled={clearMessages.isPending}>{t('common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                     variant="destructive"
                     disabled={clearMessages.isPending}
                     onClick={() => clearMessages.mutate(undefined, { onSuccess: onCleared })}
                 >
                     {clearMessages.isPending && <Spinner data-icon="inline-start" />}
-                    Limpar conversa
+                    {t('chat.clear')}
                 </AlertDialogAction>
             </AlertDialogFooter>
         </>

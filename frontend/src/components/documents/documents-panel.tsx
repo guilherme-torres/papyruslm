@@ -1,5 +1,6 @@
 import type { UseQueryResult } from '@tanstack/react-query'
 import { CircleAlertIcon, FilesIcon, Minimize2Icon, PanelLeftCloseIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { NotebookDocument } from '@/api/documents'
 import { CitationSourcePanel, type CitationTarget } from '@/components/documents/citation-source-panel'
 import { DocumentListItem } from '@/components/documents/document-list-item'
@@ -40,6 +41,7 @@ export function DocumentsPanel({
     onCollapse,
     className,
 }: DocumentsPanelProps) {
+    const { t } = useTranslation()
     if (viewer?.type === 'citation') {
         return (
             <CitationSourcePanel
@@ -58,7 +60,7 @@ export function DocumentsPanel({
                 title={viewer.document.filename}
                 className={className}
                 action={
-                    <PanelAction label="Fechar documento" onClick={onCloseViewer}>
+                    <PanelAction label={t('documents.closeDocument')} onClick={onCloseViewer}>
                         <Minimize2Icon />
                     </PanelAction>
                 }
@@ -70,11 +72,11 @@ export function DocumentsPanel({
 
     return (
         <Panel
-            title="Documentos"
+            title={t('common.documents')}
             className={className}
             action={
                 onCollapse && (
-                    <PanelAction label="Recolher painel de documentos" onClick={onCollapse}>
+                    <PanelAction label={t('documents.collapsePanel')} onClick={onCollapse}>
                         <PanelLeftCloseIcon />
                     </PanelAction>
                 )
@@ -101,6 +103,7 @@ interface DocumentListProps {
 }
 
 function DocumentList({ notebookId, documentsQuery, selection, onOpen }: DocumentListProps) {
+    const { t } = useTranslation()
     if (documentsQuery.isPending) {
         return (
             <div aria-busy className="flex flex-col gap-3 px-4 py-2">
@@ -116,11 +119,11 @@ function DocumentList({ notebookId, documentsQuery, selection, onOpen }: Documen
             <div className="px-3">
                 <Alert variant="destructive">
                     <CircleAlertIcon />
-                    <AlertTitle>Não foi possível carregar os documentos</AlertTitle>
+                    <AlertTitle>{t('documents.loadError')}</AlertTitle>
                     <AlertDescription>{documentsQuery.error.message}</AlertDescription>
                     <AlertAction>
                         <Button variant="outline" size="sm" onClick={() => void documentsQuery.refetch()}>
-                            Tentar novamente
+                            {t('common.retry')}
                         </Button>
                     </AlertAction>
                 </Alert>
@@ -135,9 +138,9 @@ function DocumentList({ notebookId, documentsQuery, selection, onOpen }: Documen
                     <EmptyMedia variant="icon">
                         <FilesIcon />
                     </EmptyMedia>
-                    <EmptyTitle>Nenhum documento</EmptyTitle>
+                    <EmptyTitle>{t('documents.emptyTitle')}</EmptyTitle>
                     <EmptyDescription>
-                        Adicione PDFs, documentos do Word, Markdown ou textos para usar como fonte do chat.
+                        {t('documents.emptyDescription')}
                     </EmptyDescription>
                 </EmptyHeader>
             </Empty>
@@ -151,7 +154,7 @@ function DocumentList({ notebookId, documentsQuery, selection, onOpen }: Documen
         <>
             <div className="flex shrink-0 items-center gap-1 px-3 pb-1">
                 <Label htmlFor="select-all-documents" className="min-w-0 flex-1 px-2.5 text-muted-foreground">
-                    Selecionar todos
+                    {t('documents.selectAll')}
                 </Label>
                 <span className="flex size-8 shrink-0 items-center justify-center">
                     <Checkbox
@@ -164,7 +167,7 @@ function DocumentList({ notebookId, documentsQuery, selection, onOpen }: Documen
                 </span>
             </div>
             <ScrollArea className="min-h-0 flex-1">
-                <ul aria-label="Documentos do caderno" className="flex flex-col gap-0.5 px-3 pb-3">
+                <ul aria-label={t('documents.listLabel')} className="flex flex-col gap-0.5 px-3 pb-3">
                     {documentsQuery.data.map((document) => (
                         <DocumentListItem
                             key={document.id}

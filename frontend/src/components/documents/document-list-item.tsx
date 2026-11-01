@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AudioLinesIcon, FileTextIcon, RotateCwIcon, Trash2Icon, TriangleAlertIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { NotebookDocument } from '@/api/documents'
 import { DeleteDocumentDialog } from '@/components/documents/delete-document-dialog'
 import { Button } from '@/components/ui/button'
@@ -18,6 +19,7 @@ interface DocumentListItemProps {
 }
 
 export function DocumentListItem({ notebookId, document, selected, onSelectedChange, onOpen }: DocumentListItemProps) {
+    const { t } = useTranslation()
     const [deleteOpen, setDeleteOpen] = useState(false)
     const reprocessDocument = useReprocessDocument(notebookId)
     const isReady = document.status === 'ready'
@@ -27,7 +29,7 @@ export function DocumentListItem({ notebookId, document, selected, onSelectedCha
 
     function reprocess() {
         reprocessDocument.mutate(document.id, {
-            onError: (error) => toast.add({ type: 'error', title: 'Não foi possível reprocessar', description: error.message }),
+            onError: (error) => toast.add({ type: 'error', title: t('documents.reprocessError'), description: error.message }),
         })
     }
 
@@ -61,7 +63,7 @@ export function DocumentListItem({ notebookId, document, selected, onSelectedCha
                         <Button
                             variant="ghost"
                             size="icon-sm"
-                            aria-label={`Excluir ${document.filename}`}
+                            aria-label={t('documents.deleteLabel', { filename: document.filename })}
                             disabled={isInProgress}
                             onClick={() => setDeleteOpen(true)}
                         />
@@ -69,17 +71,17 @@ export function DocumentListItem({ notebookId, document, selected, onSelectedCha
                 >
                     <Trash2Icon />
                 </TooltipTrigger>
-                <TooltipContent side="bottom">Excluir documento</TooltipContent>
+                <TooltipContent side="bottom">{t('documents.deleteAction')}</TooltipContent>
             </Tooltip>
             <span className="flex size-8 shrink-0 items-center justify-center">
                 {isReady && (
                     <Checkbox
                         checked={selected}
                         onCheckedChange={(checked) => onSelectedChange(checked)}
-                        aria-label={`Usar ${document.filename} como fonte`}
+                        aria-label={t('documents.useAsSource', { filename: document.filename })}
                     />
                 )}
-                {isInProgress && <Spinner aria-label={`Processando ${document.filename}`} />}
+                {isInProgress && <Spinner aria-label={t('documents.processing', { filename: document.filename })} />}
                 {isFailed && (
                     <Tooltip>
                         <TooltipTrigger
@@ -87,7 +89,7 @@ export function DocumentListItem({ notebookId, document, selected, onSelectedCha
                                 <Button
                                     variant="ghost"
                                     size="icon-sm"
-                                    aria-label={`Processar ${document.filename} novamente`}
+                                    aria-label={t('documents.reprocessLabel', { filename: document.filename })}
                                     disabled={reprocessDocument.isPending}
                                     onClick={reprocess}
                                 />
@@ -95,7 +97,7 @@ export function DocumentListItem({ notebookId, document, selected, onSelectedCha
                         >
                             <RotateCwIcon />
                         </TooltipTrigger>
-                        <TooltipContent side="bottom">Falha no processamento. Processar novamente</TooltipContent>
+                        <TooltipContent side="bottom">{t('documents.reprocessTooltip')}</TooltipContent>
                     </Tooltip>
                 )}
             </span>

@@ -3,6 +3,7 @@ import { Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { AppHeader } from '@/components/app-header'
+import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toast'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { queryClient } from '@/lib/query-client'
@@ -10,16 +11,18 @@ import { queryClient } from '@/lib/query-client'
 export default function App() {
     return (
         <QueryClientProvider client={queryClient}>
-            <TooltipProvider>
-                <Toaster>
-                    <div className="flex h-svh flex-col bg-background text-foreground">
-                        <AppHeader />
-                        <div className="min-h-0 flex-1 overflow-y-auto">
-                            <Outlet />
+            <ThemeProvider>
+                <TooltipProvider>
+                    <Toaster>
+                        <div className="flex h-svh flex-col bg-background text-foreground">
+                            <AppHeader />
+                            <div className="min-h-0 flex-1 overflow-y-auto">
+                                <Outlet />
+                            </div>
                         </div>
-                    </div>
-                </Toaster>
-            </TooltipProvider>
+                    </Toaster>
+                </TooltipProvider>
+            </ThemeProvider>
             <TanStackRouterDevtools />
             <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>

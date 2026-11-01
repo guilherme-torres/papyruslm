@@ -21,16 +21,16 @@ export interface UpdateFlashcardInput {
 
 export type ReviewQuality = 0 | 1 | 2 | 3 | 4 | 5
 
-const NOT_FOUND = 'Flashcard não encontrado.'
-const NOTEBOOK_NOT_FOUND = 'Caderno não encontrado.'
-const INVALID_CONTENT = 'Preencha a frente e o verso do flashcard.'
+const NOT_FOUND = 'flashcardNotFound'
+const NOTEBOOK_NOT_FOUND = 'notebookNotFound'
+const INVALID_CONTENT = 'flashcardInvalid'
 
 const CREATE_ERRORS: ErrorMessages = { 404: NOTEBOOK_NOT_FOUND, 422: INVALID_CONTENT }
 const UPDATE_ERRORS: ErrorMessages = { 404: NOT_FOUND, 422: INVALID_CONTENT }
 const REVIEW_ERRORS: ErrorMessages = {
     404: NOT_FOUND,
-    409: 'Este flashcard ainda não está disponível para revisão.',
-    422: 'Avaliação de revisão inválida.',
+    409: 'flashcardNotDue',
+    422: 'reviewInvalid',
 }
 
 export function listFlashcards(notebookId: string, params: PaginationParams = {}, signal?: AbortSignal): Promise<Paginated<Flashcard>> {

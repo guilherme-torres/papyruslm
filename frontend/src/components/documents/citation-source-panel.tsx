@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { CircleAlertIcon, Minimize2Icon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { TextSkeleton } from '@/components/documents/text-skeleton'
 import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -21,6 +22,7 @@ interface CitationSourcePanelProps {
 }
 
 export function CitationSourcePanel({ notebookId, target, onClose, className }: CitationSourcePanelProps) {
+    const { t } = useTranslation()
     const sourceQuery = useQuery(citationSourceQueryOptions(notebookId, target.messageId, target.index))
     const highlightRef = useRef<HTMLElement>(null)
 
@@ -30,10 +32,10 @@ export function CitationSourcePanel({ notebookId, target, onClose, className }: 
 
     return (
         <Panel
-            title={sourceQuery.data?.document_name ?? 'Fonte'}
+            title={sourceQuery.data?.document_name ?? t('documents.sourceFallback')}
             className={className}
             action={
-                <PanelAction label="Fechar fonte" onClick={onClose}>
+                <PanelAction label={t('documents.closeSource')} onClick={onClose}>
                     <Minimize2Icon />
                 </PanelAction>
             }
@@ -43,11 +45,11 @@ export function CitationSourcePanel({ notebookId, target, onClose, className }: 
                 <div className="p-4">
                     <Alert variant="destructive">
                         <CircleAlertIcon />
-                        <AlertTitle>Não foi possível abrir a fonte</AlertTitle>
+                        <AlertTitle>{t('documents.openSourceError')}</AlertTitle>
                         <AlertDescription>{sourceQuery.error.message}</AlertDescription>
                         <AlertAction>
                             <Button variant="outline" size="sm" onClick={() => void sourceQuery.refetch()}>
-                                Tentar novamente
+                                {t('common.retry')}
                             </Button>
                         </AlertAction>
                     </Alert>

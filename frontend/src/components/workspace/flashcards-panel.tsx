@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { CircleAlertIcon, GalleryVerticalEndIcon, PanelRightCloseIcon, PartyPopperIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Flashcard, ReviewQuality } from '@/api/flashcards'
 import { CreateFlashcardDialog } from '@/components/flashcards/create-flashcard-dialog'
 import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -21,18 +22,19 @@ interface FlashcardsPanelProps {
 }
 
 export function FlashcardsPanel({ notebookId, onCollapse, className }: FlashcardsPanelProps) {
+    const { t } = useTranslation()
     const nextDueQuery = useQuery(nextDueFlashcardQueryOptions(notebookId))
     const totalQuery = useQuery(flashcardsQueryOptions(notebookId, { limit: 1 }))
 
     return (
         <Panel
-            title="Flashcards"
+            title={t('common.flashcards')}
             className={className}
             action={
                 <div className="flex items-center gap-1">
                     <CreateFlashcardDialog notebookId={notebookId} compact />
                     {onCollapse && (
-                        <PanelAction label="Recolher painel de flashcards" onClick={onCollapse}>
+                        <PanelAction label={t('flashcards.collapsePanel')} onClick={onCollapse}>
                             <PanelRightCloseIcon />
                         </PanelAction>
                     )}
@@ -44,11 +46,11 @@ export function FlashcardsPanel({ notebookId, onCollapse, className }: Flashcard
                 <div className="p-4">
                     <Alert variant="destructive">
                         <CircleAlertIcon />
-                        <AlertTitle>Não foi possível carregar a revisão</AlertTitle>
+                        <AlertTitle>{t('flashcards.reviewLoadError')}</AlertTitle>
                         <AlertDescription>{nextDueQuery.error.message}</AlertDescription>
                         <AlertAction>
                             <Button variant="outline" size="sm" onClick={() => void nextDueQuery.refetch()}>
-                                Tentar novamente
+                                {t('common.retry')}
                             </Button>
                         </AlertAction>
                     </Alert>
@@ -65,15 +67,15 @@ export function FlashcardsPanel({ notebookId, onCollapse, className }: Flashcard
 }
 
 interface ReviewOption {
-    label: string
+    labelKey: 'flashcards.again' | 'flashcards.hard' | 'flashcards.good' | 'flashcards.easy'
     quality: ReviewQuality
 }
 
 const REVIEW_OPTIONS: ReviewOption[] = [
-    { label: 'Errei', quality: 1 },
-    { label: 'Difícil', quality: 3 },
-    { label: 'Bom', quality: 4 },
-    { label: 'Fácil', quality: 5 },
+    { labelKey: 'flashcards.again', quality: 1 },
+    { labelKey: 'flashcards.hard', quality: 3 },
+    { labelKey: 'flashcards.good', quality: 4 },
+    { labelKey: 'flashcards.easy', quality: 5 },
 ]
 
 interface ReviewCardProps {
@@ -82,6 +84,7 @@ interface ReviewCardProps {
 }
 
 function ReviewCard({ notebookId, flashcard }: ReviewCardProps) {
+    const { t } = useTranslation()
     const [revealed, setRevealed] = useState(false)
     const reviewFlashcard = useReviewFlashcard(notebookId)
     const pendingQuality = reviewFlashcard.isPending ? reviewFlashcard.variables.quality : undefined
@@ -89,7 +92,7 @@ function ReviewCard({ notebookId, flashcard }: ReviewCardProps) {
     const review = (quality: ReviewQuality) =>
         reviewFlashcard.mutate(
             { id: flashcard.id, quality },
-            { onError: (error) => toast.add({ type: 'error', title: 'Não foi possível registrar a revisão', description: error.message }) },
+            { onError: (error) => toast.add({ type: 'error', title: t('flashcards.reviewError'), description: error.message }) },
         )
 
     return (
@@ -97,14 +100,14 @@ function ReviewCard({ notebookId, flashcard }: ReviewCardProps) {
             <ScrollArea className="min-h-0 flex-1">
                 <div className="flex flex-col gap-4 p-4">
                     <div className="flex flex-col gap-1.5">
-                        <span className="text-xs font-medium text-muted-foreground">Frente</span>
+                        <span className="text-xs font-medium text-muted-foreground">{t('flashcards.front')}</span>
                         <p className="text-base font-medium wrap-break-word whitespace-pre-wrap">{flashcard.front}</p>
                     </div>
                     {revealed && (
                         <>
                             <Separator />
                             <div className="flex flex-col gap-1.5">
-                                <span className="text-xs font-medium text-muted-foreground">Verso</span>
+                                <span className="text-xs font-medium text-muted-foreground">{t('flashcards.back')}</span>
                                 <p className="text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">{flashcard.back}</p>
                             </div>
                         </>
@@ -115,8 +118,8 @@ function ReviewCard({ notebookId, flashcard }: ReviewCardProps) {
             <div className="flex shrink-0 flex-col gap-2 p-3">
                 {revealed ? (
                     <>
-                        <p className="text-center text-xs text-muted-foreground">Como foi lembrar a resposta?</p>
-                        <div role="group" aria-label="Avaliar revisão" className="grid grid-cols-4 gap-2">
+                        <p className="text-center text-xs text-muted-foreground">{t('flashcards.howWasIt')}</p>
+                        <div role="group" aria-label={t('flashcards.rateReview')} className="grid grid-cols-4 gap-2">
                             {REVIEW_OPTIONS.map((option) => (
                                 <Button
                                     key={option.quality}
@@ -126,13 +129,13 @@ function ReviewCard({ notebookId, flashcard }: ReviewCardProps) {
                                     onClick={() => review(option.quality)}
                                 >
                                     {pendingQuality === option.quality && <Spinner data-icon="inline-start" />}
-                                    {option.label}
+                                    {t(option.labelKey)}
                                 </Button>
                             ))}
                         </div>
                     </>
                 ) : (
-                    <Button onClick={() => setRevealed(true)}>Mostrar resposta</Button>
+                    <Button onClick={() => setRevealed(true)}>{t('flashcards.showAnswer')}</Button>
                 )}
             </div>
         </div>
@@ -145,15 +148,16 @@ interface NothingToReviewProps {
 }
 
 function NothingToReview({ notebookId, hasFlashcards }: NothingToReviewProps) {
+    const { t } = useTranslation()
     return (
         <Empty className="flex-1">
             <EmptyHeader>
                 <EmptyMedia variant="icon">{hasFlashcards ? <PartyPopperIcon /> : <GalleryVerticalEndIcon />}</EmptyMedia>
-                <EmptyTitle>{hasFlashcards ? 'Revisão em dia' : 'Nenhum flashcard ainda'}</EmptyTitle>
+                <EmptyTitle>{hasFlashcards ? t('flashcards.upToDateTitle') : t('flashcards.emptyTitle')}</EmptyTitle>
                 <EmptyDescription>
                     {hasFlashcards
-                        ? 'Nenhum flashcard para revisar agora. Volte mais tarde ou crie novos flashcards.'
-                        : 'Crie flashcards para revisar o conteúdo deste caderno.'}
+                        ? t('flashcards.upToDateDescription')
+                        : t('flashcards.emptyDescription')}
                 </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>

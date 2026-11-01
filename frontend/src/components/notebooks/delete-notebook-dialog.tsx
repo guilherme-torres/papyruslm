@@ -1,4 +1,5 @@
 import { CircleAlertIcon, Trash2Icon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Notebook } from '@/api/notebooks'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import {
@@ -37,6 +38,7 @@ interface DeleteNotebookConfirmationProps {
 }
 
 function DeleteNotebookConfirmation({ notebook, onDeleted }: DeleteNotebookConfirmationProps) {
+    const { t } = useTranslation()
     const deleteNotebook = useDeleteNotebook()
 
     return (
@@ -45,28 +47,27 @@ function DeleteNotebookConfirmation({ notebook, onDeleted }: DeleteNotebookConfi
                 <AlertDialogMedia className="bg-destructive/10 text-destructive">
                     <Trash2Icon />
                 </AlertDialogMedia>
-                <AlertDialogTitle>Excluir este caderno?</AlertDialogTitle>
+                <AlertDialogTitle>{t('notebooks.deleteTitle')}</AlertDialogTitle>
                 <AlertDialogDescription className="wrap-break-word">
-                    O caderno será excluído junto com seus flashcards, documentos e conversas. Essa
-                    ação não pode ser desfeita.
+                    {t('notebooks.deleteDescription')}
                 </AlertDialogDescription>
             </AlertDialogHeader>
             {deleteNotebook.isError && (
                 <Alert variant="destructive">
                     <CircleAlertIcon />
-                    <AlertTitle>Não foi possível excluir o caderno</AlertTitle>
+                    <AlertTitle>{t('notebooks.deleteError')}</AlertTitle>
                     <AlertDescription>{deleteNotebook.error.message}</AlertDescription>
                 </Alert>
             )}
             <AlertDialogFooter>
-                <AlertDialogCancel disabled={deleteNotebook.isPending}>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel disabled={deleteNotebook.isPending}>{t('common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                     variant="destructive"
                     disabled={deleteNotebook.isPending}
                     onClick={() => deleteNotebook.mutate(notebook.id, { onSuccess: onDeleted })}
                 >
                     {deleteNotebook.isPending && <Spinner data-icon="inline-start" />}
-                    Excluir caderno
+                    {t('notebooks.deleteAction')}
                 </AlertDialogAction>
             </AlertDialogFooter>
         </>

@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type RefObject } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { CircleAlertIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { NotebookInput } from '@/api/notebooks'
 import { TagCombobox } from '@/components/notebooks/tag-combobox'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -36,11 +37,12 @@ export function NotebookForm({
     error,
     onSubmit,
 }: NotebookFormProps) {
+    const { t } = useTranslation()
     const [name, setName] = useState(defaultValues.name)
     const [tags, setTags] = useState(defaultValues.tags)
     const [submitted, setSubmitted] = useState(false)
     const tagsQuery = useQuery(tagsQueryOptions())
-    const nameError = submitted && name.trim() === '' ? 'Informe o nome do caderno.' : undefined
+    const nameError = submitted && name.trim() === '' ? t('notebooks.nameRequired') : undefined
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -57,7 +59,7 @@ export function NotebookForm({
             </DialogHeader>
             <FieldGroup>
                 <Field data-invalid={nameError !== undefined}>
-                    <FieldLabel htmlFor="notebook-name">Nome</FieldLabel>
+                    <FieldLabel htmlFor="notebook-name">{t('notebooks.name')}</FieldLabel>
                     <Input
                         id="notebook-name"
                         ref={nameRef}
@@ -72,7 +74,7 @@ export function NotebookForm({
                     <FieldError>{nameError}</FieldError>
                 </Field>
                 <Field>
-                    <FieldLabel htmlFor="notebook-tags">Tags</FieldLabel>
+                    <FieldLabel htmlFor="notebook-tags">{t('common.tags')}</FieldLabel>
                     <TagCombobox
                         id="notebook-tags"
                         options={tagsQuery.data?.map((tag) => tag.name) ?? []}
@@ -80,7 +82,7 @@ export function NotebookForm({
                         onValueChange={setTags}
                         disabled={isPending}
                     />
-                    <FieldDescription>Escolha tags existentes ou digite o nome de uma nova.</FieldDescription>
+                    <FieldDescription>{t('notebooks.tagsDescription')}</FieldDescription>
                 </Field>
             </FieldGroup>
             {error && (
@@ -91,7 +93,7 @@ export function NotebookForm({
                 </Alert>
             )}
             <DialogFooter>
-                <DialogClose render={<Button type="button" variant="outline" />}>Cancelar</DialogClose>
+                <DialogClose render={<Button type="button" variant="outline" />}>{t('common.cancel')}</DialogClose>
                 <Button type="submit" disabled={isPending}>
                     {isPending && <Spinner data-icon="inline-start" />}
                     {submitLabel}

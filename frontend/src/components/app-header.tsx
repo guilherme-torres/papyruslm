@@ -1,5 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import logo from '@/assets/logo.svg'
+import { LanguageSelect } from '@/components/language-select'
+import { ModeToggle } from '@/components/mode-toggle'
 import { Separator } from '@/components/ui/separator'
 
 export function AppHeader() {
@@ -12,6 +14,10 @@ export function AppHeader() {
                         Papyrus<span className="text-primary">LM</span>
                     </span>
                 </Link>
+                <div className="ml-auto flex items-center gap-2">
+                    <ModeToggle />
+                    <LanguageSelect />
+                </div>
             </div>
             <Separator />
         </header>

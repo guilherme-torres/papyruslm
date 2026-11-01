@@ -1,4 +1,5 @@
 import { CircleAlertIcon, Trash2Icon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Flashcard } from '@/api/flashcards'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import {
@@ -37,6 +38,7 @@ interface DeleteFlashcardConfirmationProps {
 }
 
 function DeleteFlashcardConfirmation({ flashcard, onDeleted }: DeleteFlashcardConfirmationProps) {
+    const { t } = useTranslation()
     const deleteFlashcard = useDeleteFlashcard(flashcard.notebook_id)
 
     return (
@@ -45,27 +47,27 @@ function DeleteFlashcardConfirmation({ flashcard, onDeleted }: DeleteFlashcardCo
                 <AlertDialogMedia className="bg-destructive/10 text-destructive">
                     <Trash2Icon />
                 </AlertDialogMedia>
-                <AlertDialogTitle>Excluir este flashcard?</AlertDialogTitle>
+                <AlertDialogTitle>{t('flashcards.deleteTitle')}</AlertDialogTitle>
                 <AlertDialogDescription className="line-clamp-3 wrap-break-word">
-                    Este flashcard será excluído e sairá das suas revisões. Essa ação não pode ser desfeita.
+                    {t('flashcards.deleteDescription')}
                 </AlertDialogDescription>
             </AlertDialogHeader>
             {deleteFlashcard.isError && (
                 <Alert variant="destructive">
                     <CircleAlertIcon />
-                    <AlertTitle>Não foi possível excluir o flashcard</AlertTitle>
+                    <AlertTitle>{t('flashcards.deleteError')}</AlertTitle>
                     <AlertDescription>{deleteFlashcard.error.message}</AlertDescription>
                 </Alert>
             )}
             <AlertDialogFooter>
-                <AlertDialogCancel disabled={deleteFlashcard.isPending}>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel disabled={deleteFlashcard.isPending}>{t('common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                     variant="destructive"
                     disabled={deleteFlashcard.isPending}
                     onClick={() => deleteFlashcard.mutate(flashcard.id, { onSuccess: onDeleted })}
                 >
                     {deleteFlashcard.isPending && <Spinner data-icon="inline-start" />}
-                    Excluir flashcard
+                    {t('flashcards.deleteAction')}
                 </AlertDialogAction>
             </AlertDialogFooter>
         </>

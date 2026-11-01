@@ -1,5 +1,6 @@
 import { useRef, useState, type RefObject } from 'react'
 import { PlusIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { FlashcardForm } from '@/components/flashcards/flashcard-form'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
@@ -14,12 +15,13 @@ interface CreateFlashcardDialogProps {
 }
 
 export function CreateFlashcardDialog({ notebookId, compact = false, onCreated }: CreateFlashcardDialogProps) {
+    const { t } = useTranslation()
     const [open, setOpen] = useState(false)
     const frontRef = useRef<HTMLTextAreaElement>(null)
 
     const handleCreated = () => {
         setOpen(false)
-        toast.add({ type: 'success', description: 'Flashcard criado.' })
+        toast.add({ type: 'success', description: t('flashcards.created') })
         onCreated?.()
     }
 
@@ -29,17 +31,17 @@ export function CreateFlashcardDialog({ notebookId, compact = false, onCreated }
                 <Tooltip>
                     <TooltipTrigger
                         render={
-                            <DialogTrigger render={<Button variant="ghost" size="icon-sm" aria-label="Criar flashcard" />} />
+                            <DialogTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t('flashcards.create')} />} />
                         }
                     >
                         <PlusIcon />
                     </TooltipTrigger>
-                    <TooltipContent side="bottom">Criar flashcard</TooltipContent>
+                    <TooltipContent side="bottom">{t('flashcards.create')}</TooltipContent>
                 </Tooltip>
             ) : (
                 <DialogTrigger render={<Button />}>
                     <PlusIcon data-icon="inline-start" />
-                    Criar flashcard
+                    {t('flashcards.create')}
                 </DialogTrigger>
             )}
             <DialogContent initialFocus={frontRef}>
@@ -56,14 +58,15 @@ interface CreateFlashcardFormProps {
 }
 
 function CreateFlashcardForm({ notebookId, frontRef, onCreated }: CreateFlashcardFormProps) {
+    const { t } = useTranslation()
     const createFlashcard = useCreateFlashcard(notebookId)
 
     return (
         <FlashcardForm
-            title="Criar flashcard"
-            description="Escreva a pergunta na frente e a resposta no verso."
-            submitLabel="Criar flashcard"
-            errorTitle="Não foi possível criar o flashcard"
+            title={t('flashcards.create')}
+            description={t('flashcards.createDescription')}
+            submitLabel={t('flashcards.create')}
+            errorTitle={t('flashcards.createError')}
             defaultValues={{ front: '', back: '' }}
             frontRef={frontRef}
             isPending={createFlashcard.isPending}

@@ -1,4 +1,5 @@
 import type { MouseEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
     Pagination,
     PaginationContent,
@@ -30,6 +31,7 @@ function pageSlots(page: number, totalPages: number): PageSlot[] {
 }
 
 export function PagePagination({ page, totalPages, hrefFor, onPageChange }: PagePaginationProps) {
+    const { t } = useTranslation()
     if (totalPages <= 1) return null
 
     const handleClick = (target: number) => (event: MouseEvent<HTMLAnchorElement>) => {
@@ -42,8 +44,8 @@ export function PagePagination({ page, totalPages, hrefFor, onPageChange }: Page
             <PaginationContent>
                 <PaginationItem>
                     <PaginationPrevious
-                        text="Anterior"
-                        aria-label="Ir para a página anterior"
+                        text={t('pagination.previous')}
+                        aria-label={t('pagination.previousLabel')}
                         aria-disabled={page === 1}
                         href={hrefFor(Math.max(1, page - 1))}
                         onClick={handleClick(page - 1)}
@@ -58,7 +60,7 @@ export function PagePagination({ page, totalPages, hrefFor, onPageChange }: Page
                         <PaginationItem key={slot.page}>
                             <PaginationLink
                                 isActive={slot.page === page}
-                                aria-label={`Ir para a página ${slot.page}`}
+                                aria-label={t('pagination.pageLabel', { page: slot.page })}
                                 href={hrefFor(slot.page)}
                                 onClick={handleClick(slot.page)}
                             >
@@ -69,8 +71,8 @@ export function PagePagination({ page, totalPages, hrefFor, onPageChange }: Page
                 )}
                 <PaginationItem>
                     <PaginationNext
-                        text="Próxima"
-                        aria-label="Ir para a próxima página"
+                        text={t('pagination.next')}
+                        aria-label={t('pagination.nextLabel')}
                         aria-disabled={page === totalPages}
                         href={hrefFor(Math.min(totalPages, page + 1))}
                         onClick={handleClick(page + 1)}

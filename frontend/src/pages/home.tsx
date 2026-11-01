@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getRouteApi, useRouter } from '@tanstack/react-router'
 import { CircleAlertIcon, NotebookTabsIcon, SearchXIcon, TagIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { CreateNotebookDialog } from '@/components/notebooks/create-notebook-dialog'
 import { NotebookCard, NotebookCardSkeleton } from '@/components/notebooks/notebook-card'
 import { PagePagination } from '@/components/page-pagination'
@@ -16,11 +17,8 @@ const route = getRouteApi('/')
 
 const PAGE_SIZE = 12
 
-function notebooksLabel(total: number): string {
-    return total === 1 ? '1 caderno' : `${total} cadernos`
-}
-
 export function Home() {
+    const { t } = useTranslation()
     const { page = 1, tags = [] } = route.useSearch()
     const navigate = route.useNavigate()
     const router = useRouter()
@@ -54,19 +52,19 @@ export function Home() {
         <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6">
             <div className="flex flex-wrap items-end justify-between gap-4">
                 <div className="flex flex-col gap-1">
-                    <h1 className="font-heading text-3xl font-medium">Meus cadernos</h1>
+                    <h1 className="font-heading text-3xl font-medium">{t('home.title')}</h1>
                     <p className="text-sm text-muted-foreground">
-                        {notebooksQuery.isSuccess ? notebooksLabel(total) : 'Carregando cadernos…'}
+                        {notebooksQuery.isSuccess ? t('home.notebookCount', { count: total }) : t('home.loading')}
                     </p>
                 </div>
                 {!isEmptyLibrary && <CreateNotebookDialog />}
             </div>
 
             {!isEmptyLibrary && availableTags.length > 0 && (
-                <div role="group" aria-label="Filtrar cadernos por tag" className="flex flex-wrap items-center gap-3">
+                <div role="group" aria-label={t('home.filterByTag')} className="flex flex-wrap items-center gap-3">
                     <span className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
                         <TagIcon />
-                        Tags
+                        {t('common.tags')}
                     </span>
                     <ToggleGroup
                         multiple
@@ -80,7 +78,7 @@ export function Home() {
                             <ToggleGroupItem
                                 key={tag.id}
                                 value={tag.name}
-                                aria-label={`${tag.name}, ${notebooksLabel(tag.notebooks_total)}`}
+                                aria-label={t('home.tagOption', { tag: tag.name, count: t('home.notebookCount', { count: tag.notebooks_total }) })}
                             >
                                 {tag.name}
                                 <span className="text-muted-foreground tabular-nums">{tag.notebooks_total}</span>
@@ -89,7 +87,7 @@ export function Home() {
                     </ToggleGroup>
                     {isFiltering && (
                         <Button variant="ghost" size="sm" onClick={() => changeTags([])}>
-                            Limpar filtro
+                            {t('home.clearFilter')}
                         </Button>
                     )}
                 </div>
@@ -106,11 +104,11 @@ export function Home() {
             {notebooksQuery.isError && (
                 <Alert variant="destructive">
                     <CircleAlertIcon />
-                    <AlertTitle>Não foi possível carregar os cadernos</AlertTitle>
+                    <AlertTitle>{t('home.loadError')}</AlertTitle>
                     <AlertDescription>{notebooksQuery.error.message}</AlertDescription>
                     <AlertAction>
                         <Button variant="outline" size="sm" onClick={() => void notebooksQuery.refetch()}>
-                            Tentar novamente
+                            {t('common.retry')}
                         </Button>
                     </AlertAction>
                 </Alert>
@@ -122,9 +120,9 @@ export function Home() {
                         <EmptyMedia variant="icon">
                             <NotebookTabsIcon />
                         </EmptyMedia>
-                        <EmptyTitle>Nenhum caderno ainda</EmptyTitle>
+                        <EmptyTitle>{t('home.emptyTitle')}</EmptyTitle>
                         <EmptyDescription>
-                            Crie um caderno para reunir documentos, fazer perguntas sobre eles e revisar com flashcards.
+                            {t('home.emptyDescription')}
                         </EmptyDescription>
                     </EmptyHeader>
                     <EmptyContent>
@@ -139,12 +137,12 @@ export function Home() {
                         <EmptyMedia variant="icon">
                             <SearchXIcon />
                         </EmptyMedia>
-                        <EmptyTitle>Nenhum caderno encontrado</EmptyTitle>
-                        <EmptyDescription>Nenhum caderno tem as tags selecionadas.</EmptyDescription>
+                        <EmptyTitle>{t('home.noMatchesTitle')}</EmptyTitle>
+                        <EmptyDescription>{t('home.noMatchesDescription')}</EmptyDescription>
                     </EmptyHeader>
                     <EmptyContent>
                         <Button variant="outline" onClick={() => changeTags([])}>
-                            Limpar filtro
+                            {t('home.clearFilter')}
                         </Button>
                     </EmptyContent>
                 </Empty>

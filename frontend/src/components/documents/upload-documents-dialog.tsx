@@ -1,5 +1,6 @@
 import { useState, type DragEvent } from 'react'
 import { CircleAlertIcon, CircleCheckIcon, PlusIcon, UploadIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import {
     Dialog,
@@ -16,7 +17,6 @@ import { toast } from '@/components/ui/toast'
 import { useUploadDocument } from '@/queries/documents'
 
 const ACCEPTED_EXTENSIONS = '.pdf,.docx,.txt,.md,.markdown,.mp3,.wav,.m4a,.ogg,.oga,.opus,.webm,.flac'
-const UPLOAD_ERROR = 'Não foi possível enviar o arquivo.'
 
 type UploadStatus = 'uploading' | 'done' | 'error'
 
@@ -32,13 +32,14 @@ interface UploadDocumentsDialogProps {
 }
 
 export function UploadDocumentsDialog({ notebookId }: UploadDocumentsDialogProps) {
+    const { t } = useTranslation()
     const [open, setOpen] = useState(false)
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger render={<Button variant="outline" className="w-full" />}>
                 <PlusIcon data-icon="inline-start" />
-                Adicionar documento
+                {t('documents.add')}
             </DialogTrigger>
             <DialogContent>
                 <UploadDocumentsForm notebookId={notebookId} onUploaded={() => setOpen(false)} />
@@ -52,13 +53,8 @@ interface UploadDocumentsFormProps {
     onUploaded: () => void
 }
 
-function uploadedMessage(count: number): string {
-    return count === 1
-        ? 'Documento adicionado. O processamento já começou.'
-        : `${count} documentos adicionados. O processamento já começou.`
-}
-
 function UploadDocumentsForm({ notebookId, onUploaded }: UploadDocumentsFormProps) {
+    const { t } = useTranslation()
     const uploadDocument = useUploadDocument(notebookId)
     const [items, setItems] = useState<UploadItem[]>([])
     const [isDragging, setIsDragging] = useState(false)
@@ -76,11 +72,11 @@ function UploadDocumentsForm({ notebookId, onUploaded }: UploadDocumentsFormProp
         const finished = batch.map((item, index): UploadItem => {
             const result = results[index]
             if (result.status === 'fulfilled') return { ...item, status: 'done' }
-            return { ...item, status: 'error', error: result.reason instanceof Error ? result.reason.message : UPLOAD_ERROR }
+            return { ...item, status: 'error', error: result.reason instanceof Error ? result.reason.message : t('documents.uploadError') }
         })
         setItems(finished)
         if (finished.every((item) => item.status === 'done')) {
-            toast.add({ type: 'success', description: uploadedMessage(files.length) })
+            toast.add({ type: 'success', description: t('documents.uploaded', { count: files.length }) })
             onUploaded()
         }
     }
@@ -99,9 +95,9 @@ function UploadDocumentsForm({ notebookId, onUploaded }: UploadDocumentsFormProp
     return (
         <>
             <DialogHeader>
-                <DialogTitle>Adicionar documentos</DialogTitle>
+                <DialogTitle>{t('documents.uploadTitle')}</DialogTitle>
                 <DialogDescription>
-                    Os documentos são processados em segundo plano e viram fontes de consulta assim que ficam prontos.
+                    {t('documents.uploadDescription')}
                 </DialogDescription>
             </DialogHeader>
             <label
@@ -115,8 +111,8 @@ function UploadDocumentsForm({ notebookId, onUploaded }: UploadDocumentsFormProp
                 <span className="mb-1 flex size-10 items-center justify-center rounded-lg bg-muted text-foreground">
                     <UploadIcon className="size-5" />
                 </span>
-                <span className="font-medium">Arraste arquivos para cá ou clique para escolher</span>
-                <span className="text-muted-foreground">PDF e Word até 50 MB · Markdown e texto até 10 MB · Áudio até 200 MB</span>
+                <span className="font-medium">{t('documents.dropzone')}</span>
+                <span className="text-muted-foreground">{t('documents.limits')}</span>
                 <input
                     id="document-files"
                     type="file"
@@ -131,11 +127,11 @@ function UploadDocumentsForm({ notebookId, onUploaded }: UploadDocumentsFormProp
                 />
             </label>
             {items.length > 0 && (
-                <ul aria-label="Arquivos enviados" className="flex flex-col gap-2">
+                <ul aria-label={t('documents.uploadedFiles')} className="flex flex-col gap-2">
                     {items.map((item) => (
                         <li key={item.key} className="flex items-start gap-2">
                             <span className="flex h-5 shrink-0 items-center">
-                                {item.status === 'uploading' && <Spinner aria-label="Enviando" />}
+                                {item.status === 'uploading' && <Spinner aria-label={t('documents.uploading')} />}
                                 {item.status === 'done' && <CircleCheckIcon className="size-4 text-primary" />}
                                 {item.status === 'error' && <CircleAlertIcon className="size-4 text-destructive" />}
                             </span>
@@ -148,7 +144,7 @@ function UploadDocumentsForm({ notebookId, onUploaded }: UploadDocumentsFormProp
                 </ul>
             )}
             <DialogFooter>
-                <DialogClose render={<Button variant="outline" />}>Fechar</DialogClose>
+                <DialogClose render={<Button variant="outline" />}>{t('common.close')}</DialogClose>
             </DialogFooter>
         </>
     )

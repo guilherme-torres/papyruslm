@@ -1,4 +1,5 @@
 import { useRef, type RefObject } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Notebook } from '@/api/notebooks'
 import { NotebookForm } from '@/components/notebooks/notebook-form'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
@@ -29,14 +30,15 @@ interface EditNotebookFormProps {
 }
 
 function EditNotebookForm({ notebook, nameRef, onSaved }: EditNotebookFormProps) {
+    const { t } = useTranslation()
     const updateNotebook = useUpdateNotebook()
 
     return (
         <NotebookForm
-            title="Editar caderno"
-            description="Altere o nome e as tags do caderno."
-            submitLabel="Salvar alterações"
-            errorTitle="Não foi possível salvar o caderno"
+            title={t('notebooks.editTitle')}
+            description={t('notebooks.editDescription')}
+            submitLabel={t('common.saveChanges')}
+            errorTitle={t('notebooks.saveError')}
             defaultValues={{ name: notebook.name, tags: notebook.tags.map((tag) => tag.name) }}
             nameRef={nameRef}
             isPending={updateNotebook.isPending}

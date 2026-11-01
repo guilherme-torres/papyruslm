@@ -1,4 +1,5 @@
 import { CircleAlertIcon, Trash2Icon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { NotebookDocument } from '@/api/documents'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import {
@@ -43,6 +44,7 @@ interface DeleteDocumentConfirmationProps {
 }
 
 function DeleteDocumentConfirmation({ notebookId, document, onDeleted }: DeleteDocumentConfirmationProps) {
+    const { t } = useTranslation()
     const deleteDocument = useDeleteDocument(notebookId)
 
     return (
@@ -51,28 +53,27 @@ function DeleteDocumentConfirmation({ notebookId, document, onDeleted }: DeleteD
                 <AlertDialogMedia className="bg-destructive/10 text-destructive">
                     <Trash2Icon />
                 </AlertDialogMedia>
-                <AlertDialogTitle>Excluir este documento?</AlertDialogTitle>
+                <AlertDialogTitle>{t('documents.deleteTitle')}</AlertDialogTitle>
                 <AlertDialogDescription className="wrap-break-word">
-                    “{document.filename}” deixará de ser uma fonte de consulta deste caderno. Essa ação não pode ser
-                    desfeita.
+                    {t('documents.deleteDescription', { filename: document.filename })}
                 </AlertDialogDescription>
             </AlertDialogHeader>
             {deleteDocument.isError && (
                 <Alert variant="destructive">
                     <CircleAlertIcon />
-                    <AlertTitle>Não foi possível excluir o documento</AlertTitle>
+                    <AlertTitle>{t('documents.deleteError')}</AlertTitle>
                     <AlertDescription>{deleteDocument.error.message}</AlertDescription>
                 </Alert>
             )}
             <AlertDialogFooter>
-                <AlertDialogCancel disabled={deleteDocument.isPending}>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel disabled={deleteDocument.isPending}>{t('common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                     variant="destructive"
                     disabled={deleteDocument.isPending}
                     onClick={() => deleteDocument.mutate(document.id, { onSuccess: onDeleted })}
                 >
                     {deleteDocument.isPending && <Spinner data-icon="inline-start" />}
-                    Excluir documento
+                    {t('documents.deleteAction')}
                 </AlertDialogAction>
             </AlertDialogFooter>
         </>

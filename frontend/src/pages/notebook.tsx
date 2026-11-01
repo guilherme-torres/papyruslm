@@ -9,6 +9,7 @@ import {
     PanelLeftIcon,
     PanelRightIcon,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { NotebookDocument } from '@/api/documents'
 import type { Notebook } from '@/api/notebooks'
 import { ApiError } from '@/api/client'
@@ -115,13 +116,14 @@ interface NotebookHeaderProps {
 }
 
 function NotebookHeader({ notebookId, notebookQuery }: NotebookHeaderProps) {
+    const { t } = useTranslation()
     return (
         <div className="flex min-w-0 shrink-0 items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
                 <Button
                     variant="ghost"
                     size="icon-sm"
-                    aria-label="Voltar para Meus cadernos"
+                    aria-label={t('common.backToNotebooks')}
                     nativeButton={false}
                     render={<Link to="/" />}
                 >
@@ -140,7 +142,7 @@ function NotebookHeader({ notebookId, notebookQuery }: NotebookHeaderProps) {
                 render={<Link to="/notebook/$notebookId/flashcards" params={{ notebookId }} />}
             >
                 <GalleryVerticalEndIcon data-icon="inline-start" />
-                Gerenciar flashcards
+                {t('notebook.manageFlashcards')}
             </Button>
         </div>
     )
@@ -161,6 +163,7 @@ function DesktopWorkspace({
     documentsOpen,
     onDocumentsOpenChange,
 }: DesktopWorkspaceProps) {
+    const { t } = useTranslation()
     const [flashcardsOpen, setFlashcardsOpen] = useState(true)
 
     return (
@@ -176,8 +179,8 @@ function DesktopWorkspace({
                 />
             ) : (
                 <CollapsedPanel
-                    label="Documentos"
-                    expandLabel="Abrir painel de documentos"
+                    label={t('common.documents')}
+                    expandLabel={t('notebook.openDocumentsPanel')}
                     onExpand={() => onDocumentsOpenChange(true)}
                     icon={<PanelLeftIcon />}
                 />
@@ -191,8 +194,8 @@ function DesktopWorkspace({
                 />
             ) : (
                 <CollapsedPanel
-                    label="Flashcards"
-                    expandLabel="Abrir painel de flashcards"
+                    label={t('common.flashcards')}
+                    expandLabel={t('notebook.openFlashcardsPanel')}
                     onExpand={() => setFlashcardsOpen(true)}
                     icon={<PanelRightIcon />}
                 />
@@ -210,12 +213,13 @@ interface MobileWorkspaceProps {
 }
 
 function MobileWorkspace({ notebookId, documentsPanelProps, chatPanelProps, tab, onTabChange }: MobileWorkspaceProps) {
+    const { t } = useTranslation()
     return (
         <Tabs value={tab} onValueChange={(value: MobileTab) => onTabChange(value)} className="min-h-0 flex-1">
             <TabsList className="w-full shrink-0">
-                <TabsTrigger value="documents">Documentos</TabsTrigger>
-                <TabsTrigger value="chat">Chat</TabsTrigger>
-                <TabsTrigger value="flashcards">Flashcards</TabsTrigger>
+                <TabsTrigger value="documents">{t('common.documents')}</TabsTrigger>
+                <TabsTrigger value="chat">{t('common.chat')}</TabsTrigger>
+                <TabsTrigger value="flashcards">{t('common.flashcards')}</TabsTrigger>
             </TabsList>
             <TabsContent value="documents" className="flex min-h-0">
                 <DocumentsPanel {...documentsPanelProps} className="flex-1" />
@@ -236,6 +240,7 @@ interface NotebookErrorProps {
 }
 
 function NotebookError({ error, onRetry }: NotebookErrorProps) {
+    const { t } = useTranslation()
     if (error instanceof ApiError && error.status === 404) {
         return (
             <Empty className="m-4">
@@ -243,12 +248,12 @@ function NotebookError({ error, onRetry }: NotebookErrorProps) {
                     <EmptyMedia variant="icon">
                         <NotebookTabsIcon />
                     </EmptyMedia>
-                    <EmptyTitle>Caderno não encontrado</EmptyTitle>
-                    <EmptyDescription>Ele pode ter sido excluído ou o endereço está incorreto.</EmptyDescription>
+                    <EmptyTitle>{t('common.notebookNotFound')}</EmptyTitle>
+                    <EmptyDescription>{t('notebook.notFoundDescription')}</EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
                     <Button variant="outline" nativeButton={false} render={<Link to="/" />}>
-                        Voltar para Meus cadernos
+                        {t('common.backToNotebooks')}
                     </Button>
                 </EmptyContent>
             </Empty>
@@ -259,11 +264,11 @@ function NotebookError({ error, onRetry }: NotebookErrorProps) {
         <div className="mx-auto w-full max-w-2xl p-4">
             <Alert variant="destructive">
                 <CircleAlertIcon />
-                <AlertTitle>Não foi possível carregar o caderno</AlertTitle>
+                <AlertTitle>{t('notebook.loadError')}</AlertTitle>
                 <AlertDescription>{error.message}</AlertDescription>
                 <AlertAction>
                     <Button variant="outline" size="sm" onClick={onRetry}>
-                        Tentar novamente
+                        {t('common.retry')}
                     </Button>
                 </AlertAction>
             </Alert>
