@@ -1,7 +1,9 @@
 [project]
 name = "papyruslm"
 version = "0.1.0"
-description = "Add your description here"
+description = "An offline study assistant powered by local LLMs."
+license = "MIT"
+license-files = ["LICENSE"]
 readme = "README.md"
 authors = [
     { name = "guilherme-torres", email = "guilhermetorres1401@gmail.com" }
